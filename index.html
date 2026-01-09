@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TEFTEL v5.7 - CLAN FIXED</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="icon" type="image/png" href="icon.png">
+
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    
+    <style>
+        #error-console { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 50%; background: rgba(0,0,0,0.95); color: #ff5555; z-index: 9999; overflow: auto; padding: 10px; font-family: monospace; border-bottom: 2px solid red; }
+        .admin-section { border: 1px solid #444; padding: 10px; margin-bottom: 10px; border-radius: 8px; background: rgba(0,0,0,0.2); }
+        .admin-inp { width: 100%; background: #111; border: 1px solid #333; color: #fff; padding: 5px; margin-bottom: 5px; font-family: "Courier New", monospace; }
+        select.title-select { background: #222; color: var(--color-gold); border: 1px solid #000; padding: 5px; width: 100%; margin-bottom: 10px; font-family: 'Press Start 2P', cursive; font-size: 0.6rem; }
+        
+        /* ПАТЧИ CSS */
+        .banner-card { align-items: stretch !important; padding-bottom: 15px !important; }
+        .banner-btn { width: 100% !important; display: block !important; margin-top: 10px !important; border-radius: 4px !important; }
+        .float-txt { z-index: 99999 !important; text-shadow: 2px 2px 0 #000 !important; position: absolute !important; }
+        #hero-vis { cursor: pointer; transition: transform 0.1s; }
+        #hero-vis:active { transform: scale(0.9); }
+        #hero-vis::after { content: "ℹ️"; position: absolute; top: -5px; right: -5px; font-size: 1rem; opacity: 0.7; pointer-events: none; }
+        .squad-thumb { cursor: pointer; }
+        #qte-overlay { z-index: 10000 !important; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <div id="error-console" onclick="this.style.display='none'">CLOSE ERROR<br><hr></div>
+    <script>window.onerror = function(msg,u,l){document.getElementById('error-console').style.display='block';document.getElementById('error-console').innerHTML+=`🔴 ${msg}<br>Line: ${l}<hr>`;return false;};</script>
+
+    <audio id="bgm" loop></audio>
+    
+    <div class="app">
+        <img id="bg-layer" src="" alt="">
+        
+        <div class="top-hud-container">
+            <div class="resource-bar">
+                <div class="res-group">
+                    <div class="res-item"><img src="img/icons/res_gold.png" class="res-icon"> <span id="ui-gold">0</span></div>
+                    <div class="res-item"><img src="img/icons/res_gem.png" class="res-icon"> <span id="ui-gems" style="color:var(--color-gem)">0</span></div>
+                    <div class="res-item"><img src="img/icons/res_soul.png" class="res-icon"> <span id="ui-souls" style="color:var(--color-pure)">0</span></div>
+                </div>
+                <div class="prestige-badge"><span id="ui-prestige-lvl">P-0</span></div>
+            </div>
+
+            <div class="title-bar">
+                <div class="brand-title">TEFTEL</div>
+                <div class="hero-title">
+                    <div id="ui-title-display" style="font-size: 0.6em; color: var(--color-gold); margin-bottom: 4px;"></div>
+                    <div id="ui-nickname-display">HERO</div>
+                </div>
+                <div class="menu-buttons">
+                    <button class="square-btn" onclick="window.openSettings()"><img src="img/icons/icon_gear.png"></button>
+                    <button class="square-btn btn-red-icon" onclick="window.toggleMusic()"><img id="img-music" src="img/icons/icon_sound_off.png"></button>
+                </div>
+            </div>
+        </div>
+
+       <div id="screen-menu" class="screen active">
+    
+    <div id="tab-home" class="tab-content">
+        <div style="text-align:center; margin: 30px 0 20px;">
+            <h1 style="font-size: 1.8rem; color: var(--color-gold); text-shadow: 4px 4px 0 #000; line-height: 1.5;">TEFTEL<br><span style="font-size:0.8rem; color:#fff;">PIXEL REMASTER</span></h1>
+        </div>
+        
+        <div class="card glass" style="flex-direction: column; text-align: center; padding: 20px; border-width: 4px;">
+            <div style="width:100%; text-align:left; margin-bottom:10px; font-size:0.7rem; color:#aaa;">SELECT WORLD:</div>
+            <div class="world-selector-row">
+                <div class="world-sq-btn ws-jjk" onclick="window.setWorld('jjk')"><div style="font-size:1.5rem">🗼</div><div>JJK</div></div>
+                <div class="world-sq-btn ws-op" onclick="window.setWorld('op')"><div style="font-size:1.5rem">☠️</div><div>OP</div></div>
+                <div class="world-sq-btn ws-jojo" onclick="window.setWorld('jojo')"><div style="font-size:1.5rem">⭐</div><div>JOJO</div></div>
+                <div class="world-sq-btn ws-ut" onclick="window.setWorld('ut')"><div style="font-size:1.5rem">❤️</div><div>UT</div></div>
+            </div>
+            
+            <div class="main-battle-block">
+                <div class="tower-icon-anim" id="tower-icon" onclick="window.trackClick('tower')">🗼</div>
+                <div style="font-size:0.8rem; margin-bottom:10px; color:var(--color-gold);" id="tower-name">Башня Проклятий</div>
+                <button class="btn-main btn-start-battle" onclick="window.preBattle()">В БОЙ ⚔️<br><span style="font-size:0.6rem; color:#aaa;">ЭТАЖ <span id="menu-floor">1</span></span></button>
+            </div>
+
+            <!-- 🔥 FIX: Реорганизация - Доп режимы объединены в одну вкладку -->
+            <!-- Режимы разблокируются по мирам: Левиафан и Колизей со 2-го мира, Испытание Души с 4-го -->
+            <div style="display:flex; gap:10px; width:100%; margin-top:15px;">
+                <button class="icon-btn" style="flex:1;" onclick="window.openQuests()">📜 QUESTS</button>
+                <button class="icon-btn" style="flex:1; background:var(--color-gold); color:#000;" onclick="window.openLeaderboard()">🏆 TOP</button>
+            </div>
+        </div>
+
+        <h4 style="margin: 20px 0 10px; color:var(--text-muted); font-size:0.7rem; text-align: center;">YOUR SQUAD</h4>
+        <div id="home-squad-list" style="display:flex; gap:10px; justify-content:center; padding-bottom:10px;"></div>
+        
+        <!-- 🔥 FIX: Система сохранения отрядов (3 слота) -->
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;">
+            <button class="btn-main" style="width:100%; font-size:0.8rem;" onclick="window.saveSquadToSlot(0); window.saveSquadToSlot(1); window.saveSquadToSlot(2);" title="Сохранить текущий отряд во все слоты">💾 СОХРАНИТЬ ОТРЯД</button>
+            <div style="display:flex; gap:5px; justify-content:center;">
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(0)" title="Сохранить в слот 1">💾</button>
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(0)" title="Загрузить слот 1">1️⃣</button>
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(1)" title="Сохранить в слот 2">💾</button>
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(1)" title="Загрузить слот 2">2️⃣</button>
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(2)" title="Сохранить в слот 3">💾</button>
+                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(2)" title="Загрузить слот 3">3️⃣</button>
+            </div>
+        </div>
+    </div> 
+    
+    <div id="tab-heroes" class="tab-content" style="display:none">
+        <h3 style="text-align:center; color:white; margin:15px 0 10px;">КОЛЛЕКЦИЯ</h3>
+
+        <div class="hero-filter-row" style="border-bottom: 2px solid #333; margin-bottom: 5px;">
+            <button class="filter-tab active" onclick="window.handleFilterClick('all', this)">ALL</button>
+            <button class="filter-tab" onclick="window.handleFilterClick('jjk', this)">JJK</button>
+            <button class="filter-tab" onclick="window.handleFilterClick('op', this)">OP</button>
+            <button class="filter-tab" onclick="window.handleFilterClick('jojo', this)">JOJO</button>
+            <button class="filter-tab" onclick="window.handleFilterClick('ut', this)">UT</button>
+        </div>
+
+        <div class="hero-filter-row" style="border-bottom: 4px solid #000; margin-bottom: 15px;">
+            <button class="filter-tab" style="border-color:#444" onclick="window.handleFilterClick('tank', this)">🛡️ ТАНК</button>
+            <button class="filter-tab" style="border-color:#444" onclick="window.handleFilterClick('fighter', this)">⚔️ БОЕЦ</button>
+            <button class="filter-tab" style="border-color:#444" onclick="window.handleFilterClick('assassin', this)">🗡️ УБИЙЦА</button>
+            <button class="filter-tab" style="border-color:#444" onclick="window.handleFilterClick('mage', this)">🔮 МАГ</button>
+            <button class="filter-tab" style="border-color:#444" onclick="window.handleFilterClick('support', this)">💚 САППОРТ</button>
+        </div>
+        
+        <div id="heroes-list"></div>
+    </div>
+
+    <div id="tab-shop" class="tab-content" style="display:none">
+        <h3 style="color:var(--color-gold); text-align:center; margin-bottom:15px">SUMMON</h3>
+        <div class="banner-card banner-bronze">
+            <div class="banner-title" style="color:#cd7f32">БРОНЗА</div>
+            <div class="banner-rates">Com 60% • Rare 30% • Spc 10%</div>
+            <button class="banner-btn" style="background:#cd7f32" onclick="window.summonBanner('bronze')">100 💰</button>
+        </div>
+        <div class="banner-card banner-silver">
+            <div class="banner-title" style="color:#c0c0c0">СЕРЕБРО</div>
+            <div class="banner-rates">Rare 50% • Spc 35% • Leg 15%</div>
+            <button class="banner-btn" style="background:#c0c0c0" onclick="window.summonBanner('silver')">1000 💰</button>
+        </div>
+        <div class="banner-card banner-gold">
+            <div class="banner-title" style="color:#ffd700">ЗОЛОТО</div>
+            <div class="banner-rates">Spc 40% • Leg 40% • Myth 20%</div>
+            <button class="banner-btn" style="background:#ffd700" onclick="window.summonBanner('gold')">100 💎</button>
+        </div>
+        <div id="divine-banner-container" class="card glass" style="flex-direction:column; text-align:center; border: 2px solid var(--color-gem); margin-top: 20px;">
+            <div style="font-size:2rem">✨</div>
+            <div style="font-weight:bold; margin-bottom:5px; font-size:0.8rem;">DIVINE BANNER</div>
+            <button class="btn-main" style="background:linear-gradient(45deg, #00f, #0ff); color:#fff;" onclick="window.summonDivine()">20000 👻</button>
+        </div>
+        <div class="card glass" style="flex-direction:column; text-align:center; margin-top:20px;">
+            <button class="btn-main btn-purple" style="margin-bottom:5px" onclick="window.recycleDuplicates()">♻️ ПЕРЕРАБОТКА</button>
+            <button class="btn-main" style="background:var(--color-pure)" onclick="window.openAltar()">🔮 ДРЕВО УЛУЧШЕНИЙ</button>
+        </div>
+        <div class="card glass" style="flex-direction:column; text-align:center; margin-top:20px;">
+            <div style="color:var(--color-shard); font-weight:bold; font-size:0.8rem;">ПРЕСТИЖ</div>
+            <button class="btn-main" style="background:var(--color-shard);" onclick="window.doPrestige()">СБРОСИТЬ ПРОГРЕСС</button>
+        </div>
+    </div>
+
+    <!-- 🔥 FIX: Вкладка "Доп режимы" (объединяет Левиафан, Колизей, Испытание Души) -->
+    <div id="tab-modes" class="tab-content" style="display:none">
+        <div style="text-align:center; margin: 20px 0;">
+            <h2 style="color:var(--color-gold); font-size:1.5rem;">🎮 ДОП РЕЖИМЫ</h2>
+        </div>
+        
+        <!-- Левиафан (разблокируется со 2-го мира) -->
+        <div id="mode-rift-container" class="card glass" style="flex-direction:column; text-align:center; padding:20px; margin-bottom:15px; display:none;">
+            <h3 style="color:#06b6d4; margin-bottom:10px;">🌊 РАЗЛОМ ЛЕВИАФАНА</h3>
+            <div style="font-size:0.7rem; color:#aaa; margin-bottom:15px;">Этаж: <span id="rift-floor-display">1</span></div>
+            <button class="btn-main btn-rift" onclick="window.startRift()">В БОЙ</button>
+        </div>
+        
+        <!-- Колизей (разблокируется со 2-го мира) -->
+        <div id="mode-arena-container" class="card glass" style="flex-direction:column; text-align:center; padding:20px; margin-bottom:15px; display:none;">
+            <h3 style="color:var(--color-hp); margin-bottom:10px;">⚔️ КОЛИЗЕЙ</h3>
+            <div style="font-size:1rem; color:var(--color-gold); margin-bottom:5px;">Ранг: <span id="arena-rank">1000</span> 🏆</div>
+            <div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:15px;">Побед: <span id="arena-wins">0</span></div>
+            <button class="btn-main btn-purple" style="margin-bottom:10px" onclick="window.fetchLeaderboard('arena')">🏆 ЛУЧШИЕ ГЛАДИАТОРЫ</button>
+            <div style="width:100%; border-top:2px solid #000; padding-top:15px; margin-top:10px;">
+                <p style="font-size:0.6rem; margin-bottom:10px;">Обновить данные твоего отряда:</p>
+                <button class="btn-main btn-purple" onclick="window.registerArena()">🛡️ СОХРАНИТЬ ОТРЯД</button>
+            </div>
+            <div style="width:100%; margin-top:15px;">
+                <button class="btn-main btn-danger" onclick="window.findMatch()">⚔️ НАЙТИ МАТЧ</button>
+            </div>
+        </div>
+        
+        <!-- Испытание Души (разблокируется с 4-го мира) -->
+        <div id="mode-soul-container" class="card glass" style="flex-direction:column; text-align:center; padding:20px; display:none;">
+            <h3 style="color:#ec4899; margin-bottom:10px;">❤️ ИСПЫТАНИЕ ДУШИ</h3>
+            <div style="font-size:0.7rem; color:#aaa; margin-bottom:15px;">Смена правил боя</div>
+            <button class="btn-main" style="background: linear-gradient(90deg, #ef4444, #3b82f6, #eab308, #22c55e); border: 2px solid #fff;" onclick="window.startSoulTrial()">
+                НАЧАТЬ ИСПЫТАНИЕ
+            </button>
+        </div>
+        
+        <!-- Рейд Босс (разблокируется с 3-го мира - гильдия) -->
+        <div id="mode-raid-container" class="card glass" style="flex-direction:column; text-align:center; padding:20px; margin-top:15px; display:none;">
+            <h3 style="color:#8b5cf6; margin-bottom:10px;">☠️ РЕЙД БОСС</h3>
+            <button id="btn-main-raid" class="btn-main" style="background:linear-gradient(90deg, #4b0082, #000); border-color:#8b5cf6; height:60px; position:relative;" onclick="window.tryEnterRaid()">
+                <div style="font-size:1.2rem;">В БОЙ</div>
+                <div id="raid-btn-status" style="font-size:0.5rem; color:#aaa;">Загрузка...</div>
+                <div id="raid-lock-icon" style="position:absolute; right:10px; top:15px; font-size:1.5rem; display:none;">🔒</div>
+            </button>
+        </div>
+    </div>
+</div>
+
+        <div id="screen-battle" class="screen">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 0 5px;">
+                <div style="font-size:0.6rem; color:var(--text-muted);"><span id="battle-world-name">ЭТАЖ</span> <span id="battle-lvl" style="color:#fff">1</span></div>
+                <div style="display: flex; gap: 5px; align-items: center;">
+                    <button class="icon-btn" style="padding: 4px; font-size: 0.8rem;" onclick="window.showPerksList()">🎁</button>
+                    <div id="turn-indicator" style="font-size:0.6rem; background:#333; padding:2px 5px; border:1px solid #000;">ВАШ ХОД</div>
+                </div>
+            </div>
+            
+            <div class="battle-stage">
+                <div id="limit-ui" class="limit-container">
+                    <div class="limit-bar-bg"><div id="limit-bar" class="limit-bar-fill"></div></div>
+                    <button id="limit-btn" class="limit-btn" onclick="window.useLimitBreak()">РАЗРЫВ ЛИМИТОВ!</button>
+                </div>
+                
+                <div class="enemies-wrapper" id="enemies-wrapper"></div>
+                
+                <div class="hero-container">
+                    <div id="hero-vis" class="fighter-vis" onclick="window.openHeroInfoFromBattle()">👤</div>
+                    <div class="bar-group">
+                        <div id="hero-hp-bar" class="bar-state-img" style="background-image: url('img/ui/hp_5.png');"></div>
+                        <div id="hero-hp-txt" class="bar-text">100/100</div>
+                    </div>
+                    <div class="bar-group">
+                        <div id="hero-ult-bar" class="bar-state-img" style="background-image: url('img/ui/mp_0.png');"></div>
+                        <div id="hero-ult-txt" class="bar-text">0/10</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div id="squad-selector" class="squad-selector"></div>
+            <div id="skills-grid" class="action-grid glass"></div>
+        </div>
+
+        <div id="screen-clan" class="screen" style="display:none; flex-direction:column; padding:10px; padding-bottom:90px;">
+            
+            <div id="ui-no-clan" style="display:none; text-align:center; width:100%;">
+                <div class="card glass" style="padding:20px; margin-bottom:20px;">
+                     <h3 style="color:white; margin-bottom:10px;">СОЗДАТЬ ОТРЯД</h3>
+                     <div style="font-size:0.7rem; color:#aaa; margin-bottom:10px;">Цена: 1000 💎</div>
+                     <button class="btn-main" onclick="window.createClan()">СОЗДАТЬ</button>
+                </div>
+                <h4 style="color:#aaa;">ДОСТУПНЫЕ ОТРЯДЫ:</h4>
+                <div id="public-clans-list" style="margin-bottom:10px;">Загрузка...</div>
+                <button class="btn-main btn-blue" onclick="window.fetchPublicClans()">ОБНОВИТЬ СПИСОК</button>
+            </div>
+
+           <div id="ui-my-clan" style="display:none; width:100%;">
+    
+    <div class="card glass" style="border-top:4px solid gold; padding:15px; margin-bottom:15px; text-align: center;">
+        <h2 id="c-name-txt" style="color:white; margin:0 0 5px 0; font-size:1.4rem; text-shadow: 2px 2px 0 #000;">CLAN NAME</h2>
+        <div style="display:flex; justify-content:space-between; align-items:center; background: rgba(0,0,0,0.3); padding: 5px 10px; border-radius: 4px;">
+            <div id="c-id-txt" style="font-size:0.6rem; color:#aaa;">ID: ...</div>
+            <div id="c-mem-txt" style="color:gold; font-size:0.7rem; font-weight: bold;">0 / 0</div>
+        </div>
+    </div>
+
+    <div class="card glass" style="padding:0; border:1px solid #444; margin-bottom: 15px; min-height: 280px;">
+        
+        <div style="display: flex; background: #222; cursor: pointer;">
+            <div id="btn-clan-chat" onclick="window.switchClanInnerTab('chat')" 
+                 style="flex:1; padding:10px; font-size:0.7rem; color:#fff; text-align:center; border-bottom: 2px solid var(--color-gold); font-weight:bold; transition: 0.2s;">
+                 💬 ЧАТ
+            </div>
+            <div id="btn-clan-mem" onclick="window.switchClanInnerTab('mem')" 
+                 style="flex:1; padding:10px; font-size:0.7rem; color:#555; text-align:center; border-bottom: 1px solid #333; transition: 0.2s;">
+                 👥 УЧАСТНИКИ
+            </div>
+        </div>
+
+        <div id="tab-clan-chat" style="display: block;">
+            <div id="c-chat-box" style="height:220px; overflow-y:auto; background:rgba(0,0,0,0.3); padding:8px; display:flex; flex-direction:column; gap:5px;">
+                </div>
+            
+            <div style="display:flex; border-top:1px solid #444; padding: 5px;">
+                <input id="chat-inp" placeholder="Написать..." style="flex:1; background:#111; color:white; border:1px solid #333; padding:8px; font-family:inherit; font-size: 0.7rem;">
+                <button class="btn-main" onclick="window.sendClanMsg()" style="width:50px; margin:0 0 0 5px; border:1px solid #000;">></button>
+            </div>
+        </div>
+
+        <div id="tab-clan-mem" style="display: none; padding: 10px;">
+            <div style="color:#aaa; font-size:0.6rem; margin-bottom:10px; text-align:center;">СПИСОК БОЙЦОВ:</div>
+            <div id="c-members-box" style="max-height: 230px; overflow-y: auto; border: 1px solid #333; border-radius: 4px;"></div>
+        </div>
+
+    </div>
+
+    <div class="card glass" style="border: 2px solid #444; padding: 15px; margin-top: 20px;">
+        <div style="text-align: center; font-size: 0.8rem; color: #fff; margin-bottom: 15px; border-bottom: 1px solid #444; padding-bottom: 5px;">
+            ⚙️ УПРАВЛЕНИЕ
+        </div>
+
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <button class="btn-main" onclick="window.openDonateMenu()" style="flex:1; border-color:#c084fc; height:auto; padding:10px; display:flex; flex-direction:column; align-items:center;">
+                <span style="font-size:0.6rem; margin-bottom:5px; color: #ccc;">КАЗНА</span>
+                <span id="c-souls-txt" style="font-size:0.9rem; color:#c084fc; font-weight: bold;">0 👻</span>
+            </button>
+            <button class="btn-main btn-purple" onclick="window.openClanUpgrades()" style="flex:1; height:auto; padding:10px; display:flex; flex-direction:column; align-items:center;">
+                <span style="font-size:0.6rem; margin-bottom:5px; color: #ccc;">УЛУЧШЕНИЯ</span>
+                <span id="c-lvl-txt" style="font-size:0.9rem; font-weight: bold;">LVL 1</span>
+            </button>
+        </div>
+
+        <button class="btn-main btn-danger" onclick="window.leaveClan()" style="width: 100%; font-size: 0.7rem; opacity: 0.8;">
+            ПОКИНУТЬ КЛАН 🚪
+        </button>
+    </div>
+
+</div>
+
+</div>
+        </div>
+
+        <div id="ui-nav" class="nav-bar">
+            <div id="nav-home" class="nav-item active" onclick="window.switchTab('home', this)"><img src="img/icons/icon_home.png" class="icon-img"></div>
+            <div id="nav-clan" class="nav-item" onclick="window.switchTab('clan', this)" style="display:none;"><img src="img/icons/icon_clan.png" class="icon-img"></div>
+            <div id="nav-heroes" class="nav-item" onclick="window.switchTab('heroes', this)"><img src="img/icons/icon_hero.png" class="icon-img"></div>
+            <div id="nav-modes" class="nav-item" onclick="window.switchTab('modes', this)" style="display:none;"><img src="img/icons/icon_arena.png" class="icon-img"></div>
+            <div id="nav-shop" class="nav-item" onclick="window.switchTab('shop', this)"><img src="img/icons/icon_shop.png" class="icon-img"></div>
+        </div>
+
+        <div id="qte-overlay" class="overlay" onclick="window.handleQTEClick()">
+            <h1 style="color:#fff; font-size:2rem; margin-bottom:20px; text-shadow: 4px 4px 0 #000;">ЖМИ!</h1>
+            <div class="qte-track">
+                <div id="qte-zone" class="qte-zone"></div>
+                <div id="qte-cursor" class="qte-cursor"></div>
+            </div>
+        </div>
+
+        <div id="modal-quests" class="overlay">
+            <div class="modal-box glass" style="max-width:400px; height:80vh;">
+                <div style="display:flex; border-bottom:2px solid #000; margin-bottom:10px;">
+                    <button class="tab-btn active" onclick="window.switchQuestTab('quests', this)">КВЕСТЫ</button>
+                    <button class="tab-btn" onclick="window.switchQuestTab('achievements', this)">АЧИВКИ</button>
+                </div>
+                <div id="quest-content-quests" class="quest-tab-content"></div>
+                <div id="quest-content-achievements" class="quest-tab-content" style="display:none;"></div>
+                <button class="btn-main" onclick="document.getElementById('modal-quests').style.display='none'">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+
+        <div id="modal-altar" class="overlay">
+            <div class="modal-box glass">
+                <h3 style="color:var(--color-pure)">УЛУЧШЕНИЯ</h3>
+                <div style="color:#aaa; margin-bottom:10px; font-size:0.6rem;">КРИСТАЛЫ: <span id="altar-crystals" style="color:#fff">0</span> 👻</div>
+                <div id="altar-list" style="max-height:300px; overflow-y:auto"></div>
+                <button class="btn-main" onclick="document.getElementById('modal-altar').style.display='none'">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+
+        <div id="modal-settings" class="overlay">
+            <div class="modal-box glass">
+                <h3>НАСТРОЙКИ</h3>
+                <label style="font-size:0.6rem; color:#aaa; display:block; text-align:left;">TITLE:</label>
+                <select id="inp-title" class="title-select" onchange="window.saveSettings()"><option value="">No Title</option></select>
+                <p style="font-size:0.6rem;">ТВОЙ ID:</p>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <input type="text" id="ui-user-id" readonly style="flex:1; background:transparent; border:none; color:var(--color-gold); font-family:monospace; font-size:0.6rem;" value="...">
+                    <button class="btn-small" onclick="navigator.clipboard.writeText(document.getElementById('ui-user-id').value)">C</button>
+                </div>
+                <button class="btn-main btn-blue" onclick="window.saveToCloud()">☁️ СОХРАНИТЬ</button>
+                <div style="display:flex; gap:5px; margin-top:5px;">
+                    <input type="text" id="inp-recover-id" placeholder="Friend ID..." style="flex:1; background:#222; border:1px solid #444; color:#fff; padding:5px; font-family:monospace;">
+                    <button class="btn-main btn-danger" style="width:auto; margin:0;" onclick="window.loadFromCloud()">ВЫГРУЗИТЬ</button>
+                </div>
+                <hr style="border:1px solid #333; margin:15px 0;">
+                <input type="text" id="inp-nickname" style="width:100%; padding:10px; background:#222; color:#fff; border:1px solid #444; margin-bottom:10px; font-family:'Press Start 2P';" placeholder="Имя...">
+                <button class="btn-main" onclick="window.saveSettings()">ИЗМЕНИТЬ ИМЯ</button>
+                <div style="display:flex; gap:5px; margin-top:10px;">
+                    <input type="text" id="inp-code" style="flex:1; padding:10px; background:#222; color:#fff; border:1px solid #444; font-family:monospace;" placeholder="Введите код...">
+                    <button class="btn-main" style="width:60px; margin:0;" onclick="window.checkCode()">OK</button>
+                </div>
+                <button class="icon-btn" style="margin-top:10px; width:100%" onclick="document.getElementById('modal-settings').style.display='none'">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+
+        <div id="modal-leaderboard" class="overlay">
+            <div class="modal-box glass">
+                <h2>🏆 TOP PLAYERS</h2>
+                <div style="display:flex; gap:5px; margin-bottom:10px;">
+                    <button class="btn-main btn-purple" style="font-size:0.6rem;" onclick="window.fetchLeaderboard('jjk')">JJK</button>
+                    <button class="btn-main btn-blue" style="font-size:0.6rem;" onclick="window.fetchLeaderboard('op')">OP</button>
+                    <button class="btn-main btn-danger" style="font-size:0.6rem;" onclick="window.fetchLeaderboard('jojo')">JOJO</button>
+                </div>
+                <div style="border-top: 1px solid #333; padding-top: 10px; margin-top: 5px;">
+                    <div style="font-size:0.6rem; color:#aaa; margin-bottom:5px;">КЛАНЫ:</div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="btn-main" style="font-size:0.6rem; border-color:#ef4444;" onclick="window.fetchClanLeaderboard('power')">⚔️ УРОН</button>
+                        <button class="btn-main" style="font-size:0.6rem; border-color:#c084fc;" onclick="window.fetchClanLeaderboard('rich')">👻 КАЗНА</button>
+                    </div>
+                </div>
+                <div id="lb-content" style="max-height:300px; overflow-y:auto; text-align:left; font-size:0.6rem; margin-top:10px;">Загрузка...</div>
+                <button class="btn-main" style="margin-top:10px;" onclick="document.getElementById('modal-leaderboard').style.display='none'">ЗАКРЫТЬ</button>
+            </div>
+        </div>
+
+        <div id="modal-hero" class="overlay">
+            <div class="glass" style="width:90%; max-width:380px; padding:20px; border-radius:16px; text-align:center; border-width:4px;">
+                <div id="mh-vis" class="fighter-vis"></div>
+                <h2 id="mh-name" style="margin:10px 0; font-size:1rem;"></h2>
+                <div style="color:var(--color-gold); font-size:0.7rem;">LVL <span id="mh-lvl-txt"></span> <span id="mh-stars"></span></div>
+                <div style="color:#aaa; font-size:0.6rem; margin-bottom:10px;">Dupes: <span id="mh-dupes">0</span></div>
+                <div style="display:flex; justify-content:space-around; margin:10px 0; background:rgba(0,0,0,0.3); padding:5px; border:1px solid #000;">
+                    <span style="color:var(--color-hp)">❤️ <span id="mh-hp"></span></span>
+                    <span style="color:var(--color-energy)">⚔️ <span id="mh-atk"></span></span>
+                </div>
+                <div style="display:flex; gap:5px; margin-bottom:10px">
+                     <button id="mh-train-btn" class="btn-main" style="flex:1" onclick="window.trainHero(1)">+1 UP</button>
+                     <button class="btn-main" style="width:60px" onclick="window.trainHero('max')">MAX</button>
+                </div>
+                <button id="mh-evolve-btn" class="btn-main" style="background:var(--color-gold); color:#000;" onclick="window.evolveHero()">⭐️ ВОЗНЕСТИ</button>
+                <div class="skill-list-container" id="mh-skills" style="font-size:0.6rem;"></div>
+                <div style="margin-top:10px;">
+                    <button id="mh-btn" class="btn-main" onclick="">СНАРЯДИТЬ</button>
+                    <button class="icon-btn" style="width:100%; margin-top:5px" onclick="document.getElementById('modal-hero').style.display='none'">ЗАКРЫТЬ</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modal-summon" class="overlay"><div class="modal-box glass"><h3>ПРИЗВАНО</h3><div class="skill-list-container" id="summon-log" style="text-align:left; background:rgba(0,0,0,0.5); padding:10px; font-size:0.6rem;"></div><button class="btn-main" onclick="document.getElementById('modal-summon').style.display='none'">CLOSE</button></div></div>
+        
+        <div id="modal-win" class="overlay" style="background:rgba(0,0,0,0.9);">
+            <div class="modal-box glass">
+                <h1 style="color:var(--color-gold); font-size:2rem;">ПОБЕДА!</h1>
+                <div style="font-size:5rem; margin:10px 0;">🏆</div>
+                <div id="win-rewards" style="margin-bottom:20px; font-weight:bold; font-size:0.8rem;"></div>
+                <button class="btn-main" onclick="window.nextFloor()">ДАЛЬШЕ ⏩</button>
+                <button class="icon-btn" style="margin-top:10px; background:transparent;" onclick="window.goToMenu()">МЕНЮ</button>
+            </div>
+        </div>
+        
+        <div id="admin-panel" style="background:#0a0a0a; z-index:9999; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                 <h2 style="color:red; margin:0; font-size:1rem;">РЕЖИМ БОГА</h2>
+                 <button class="btn-main" style="width:auto; padding:5px 15px;" onclick="document.getElementById('admin-panel').style.display='none'">EXIT</button>
+            </div>
+            <div class="admin-section">
+                <h4 style="color:var(--color-hp)">WIPE</h4>
+                <input type="text" id="adm-wipe-id" class="admin-inp" placeholder="User ID...">
+                <button class="btn-main btn-danger" onclick="window.adminWipe()">WIPE USER</button>
+            </div>
+             <div id="admin-list">Loading...</div>
+        </div>
+    </div>
+
+    <script src="database.js"></script>
+    <script src="main.js"></script>
+    
+    <script>
+        window.handleFilterClick = function(world, btn) { 
+            document.querySelectorAll('.filter-tab').forEach(b => b.classList.remove('active')); 
+            btn.classList.add('active'); 
+            if (window.setHeroFilter) window.setHeroFilter(world, btn); 
+        };
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,1935 @@
+:root {
+    --text-main: #f0f0f0;
+    --text-muted: #a0a0a0;
+    --color-gold: #fbbf24;
+    --color-gem: #22d3ee;
+    --color-shard: #c084fc;
+    --color-hp: #ef4444;
+    --color-energy: #3b82f6;
+    --color-def: #4ade80;
+    --color-pure: #e879f9;
+}
+
+/* 1. ГЛОБАЛЬНЫЕ НАСТРОЙКИ */
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    font-family: 'Press Start 2P', cursive;
+}
+
+img,
+canvas,
+.btn-main,
+.glass,
+.card,
+.bar-state-img,
+.res-icon,
+.square-btn img {
+    image-rendering: pixelated;
+    max-width: 100%;
+}
+
+html,
+body {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    background: #000;
+    color: var(--text-main);
+    overflow: hidden;
+    user-select: none;
+}
+
+.app {
+    width: 100%;
+    height: 100dvh;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background-color: #111;
+    left: 0;
+    top: 0;
+}
+
+#bg-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    z-index: 0;
+    pointer-events: none;
+    filter: brightness(0.5);
+    transition: 0.5s;
+}
+
+/* ЭКРАНЫ */
+.screen {
+    flex: 1;
+    overflow-y: auto;
+    display: none;
+    padding: 15px;
+    padding-bottom: 110px;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+}
+
+.screen.active {
+    display: flex;
+}
+
+/* UI ЭЛЕМЕНТЫ */
+.glass,
+.card,
+.modal-box,
+.banner-card {
+    background: rgba(30, 30, 35, 0.95);
+    backdrop-filter: blur(4px);
+    border: none;
+    outline: 3px solid #000;
+    box-shadow: 4px 4px 0px #000;
+    color: #fff;
+    margin-bottom: 15px;
+    position: relative;
+    border-radius: 2px;
+}
+
+.btn-main {
+    background: #333;
+    border: 3px solid #000;
+    border-radius: 4px;
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.2), inset 0 -4px 0 rgba(0, 0, 0, 0.3), 0 4px 0 #000;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+    min-height: 50px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    width: 100%;
+    text-transform: uppercase;
+    text-align: center;
+}
+
+.btn-main:active {
+    transform: translateY(4px);
+    box-shadow: inset 0 4px 0 rgba(255, 255, 255, 0.2), inset 0 -4px 0 rgba(0, 0, 0, 0.3), 0 0 0 #000;
+}
+
+.btn-blue {
+    background-color: #3b82f6;
+}
+
+.btn-danger {
+    background-color: #ef4444;
+}
+
+.btn-purple {
+    background-color: #8b5cf6;
+}
+
+.btn-rift {
+    background-color: #14b8a6;
+    filter: hue-rotate(15deg);
+}
+
+.icon-btn {
+    background: rgba(255, 255, 255, 0.15);
+    border: 2px solid #000;
+    box-shadow: 2px 2px 0 #000;
+    color: #fff;
+    border-radius: 4px;
+    padding: 8px;
+    cursor: pointer;
+    font-size: 0.6rem;
+}
+
+.icon-btn:active {
+    transform: translateY(2px);
+    box-shadow: none;
+}
+
+/* ШАПКА */
+.top-hud-container {
+    width: 100%;
+    position: relative;
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.8);
+    flex-shrink: 0;
+}
+
+.resource-bar {
+    width: 100%;
+    height: 32px;
+    background-color: #15151a;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    border-bottom: 4px solid #000;
+    font-size: 0.5rem;
+    color: #fff;
+}
+
+.res-group {
+    display: flex;
+    gap: 10px;
+}
+
+.res-item {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.res-icon {
+    width: 12px;
+    height: 12px;
+    filter: drop-shadow(1px 1px 0 #000);
+}
+
+#ui-gold {
+    color: #fbbf24;
+}
+
+#ui-gems {
+    color: #22d3ee;
+}
+
+#ui-souls {
+    color: #c084fc;
+}
+
+.prestige-badge {
+    color: #777;
+    font-size: 0.5rem;
+}
+
+.title-bar {
+    width: 100%;
+    height: 50px;
+    background-color: #2a2a35;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 10px;
+    border-bottom: 4px solid #000;
+}
+
+.brand-title {
+    font-size: 0.8rem;
+    color: #fff;
+    text-shadow: 2px 2px 0 #000;
+    width: 30%;
+}
+
+.hero-title {
+    font-size: 0.6rem;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    text-align: center;
+    width: 40%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    line-height: 1.1;
+}
+
+.menu-buttons {
+    width: 30%;
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+.square-btn {
+    width: 30px;
+    height: 30px;
+    background: #3f3f4a;
+    border: 2px solid #000;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.1), 0 3px 0 #000;
+    padding: 0;
+}
+
+.square-btn:active {
+    transform: translateY(3px);
+    box-shadow: inset 0 2px 0 rgba(255, 255, 255, 0.1), 0 0 0 #000;
+}
+
+.square-btn img {
+    width: 16px;
+    height: 16px;
+}
+
+.btn-red-icon {
+    background: #5a2e2e;
+}
+
+/* НАВИГАЦИЯ */
+.nav-bar {
+    background-color: #26262d;
+    height: 80px;
+    width: 100%;
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    z-index: 100;
+    border-top: 4px solid #000;
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    padding-bottom: 5px;
+}
+
+.nav-item {
+    width: auto;
+    height: auto;
+    background: transparent;
+    border: none;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    opacity: 0.6;
+    transition: all 0.1s;
+}
+
+.nav-item.active {
+    opacity: 1;
+    transform: translateY(-4px);
+}
+
+.nav-item img,
+.icon-img {
+    width: 32px;
+    height: 32px;
+    filter: drop-shadow(2px 2px 0 #000);
+    display: block;
+}
+
+/* ГЛАВНОЕ МЕНЮ И МИРЫ */
+/* ГЛАВНОЕ МЕНЮ И МИРЫ */
+.world-selector-row {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-bottom: 20px;
+    flex-wrap: wrap
+}
+
+.world-sq-btn {
+    flex: 1;
+    /* Кнопки растягиваются равномерно */
+    min-width: 70px;
+    /* Минимальная ширина */
+    max-width: 90px;
+    height: 75px;
+    background: #18181b;
+    border: 2px solid #333;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    box-shadow: 0 4px 0 #000;
+    transition: all 0.2s;
+    font-size: 0.65rem;
+    font-weight: bold;
+    color: #e4e4e7;
+    text-transform: uppercase;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Эффект нажатия */
+.world-sq-btn:active {
+    transform: translateY(4px);
+    box-shadow: 0 0 0 #000;
+}
+
+/* --- СТИЛИ ДЛЯ КОНКРЕТНЫХ МИРОВ --- */
+
+/* JJK: Темно-фиолетовый градиент */
+.ws-jjk {
+    border-color: #8b5cf6;
+    /* Светло-фиолетовая рамка */
+    /* Градиент: от черного к темно-фиолетовому внизу */
+    background: linear-gradient(180deg, #18181b 30%, rgba(109, 40, 217, 0.4) 100%);
+    box-shadow: 0 4px 0 #4c1d95;
+    /* Тень в цвет мира */
+}
+
+.ws-jjk div:first-child {
+    text-shadow: 0 0 10px #8b5cf6;
+}
+
+/* Свечение эмодзи */
+
+/* OP: Темно-синий градиент */
+.ws-op {
+    border-color: #3b82f6;
+    background: linear-gradient(180deg, #18181b 30%, rgba(37, 99, 235, 0.4) 100%);
+    box-shadow: 0 4px 0 #1e40af;
+}
+
+.ws-op div:first-child {
+    text-shadow: 0 0 10px #3b82f6;
+}
+
+/* JOJO: Темно-красный градиент */
+.ws-jojo {
+    border-color: #ef4444;
+    background: linear-gradient(180deg, #18181b 30%, rgba(220, 38, 38, 0.4) 100%);
+    box-shadow: 0 4px 0 #991b1b;
+}
+
+.ws-jojo div:first-child {
+    text-shadow: 0 0 10px #ef4444;
+}
+
+/* Ховер-эффект (подсветка при наведении, если играешь с мышки) */
+.world-sq-btn:hover {
+    filter: brightness(1.2);
+}
+
+/* --- НОВЫЙ ДИЗАЙН ГЕРОЕВ (СТРОГИЕ КВАДРАТЫ) --- */
+/* --- ЗАМЕНИТЬ В STYLE.CSS --- */
+
+.hero-filter-row {
+    display: flex;
+    gap: 4px;
+    padding: 0 4px;
+    overflow-x: auto;
+    border-bottom: 2px solid #333;
+    /* Линия, на которой стоят вкладки */
+    margin-bottom: 15px;
+}
+
+.filter-tab {
+    flex: 1;
+    background: #1a1a1a;
+    color: #777;
+    border: 1px solid #333;
+    border-bottom: none;
+    /* Снизу границы нет, чтобы сливалось с линией */
+    padding: 10px 5px;
+    font-size: 0.6rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 6px 6px 0 0;
+    /* Закругление только сверху */
+    transition: all 0.2s;
+    position: relative;
+    top: 2px;
+    /* Чуть опущены */
+}
+
+.filter-tab:hover {
+    background: #252525;
+    color: #fff;
+}
+
+.filter-tab.active {
+    background: #333;
+    color: var(--color-gold);
+    border-color: var(--color-gold);
+    border-bottom: 2px solid #333;
+    /* Перекрывает линию контейнера */
+    top: 0;
+    z-index: 5;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.5);
+}
+
+#heroes-list {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* Ровно 3 колонки */
+    gap: 5px;
+    /* Маленький отступ, чтобы влезло */
+    padding: 5px;
+    padding-bottom: 100px;
+    /* Место для меню снизу */
+}
+
+.hero-card.in-squad {
+    border: 2px solid #4ade80 !important;
+    background: rgba(74, 222, 128, 0.1);
+}
+
+.h-role {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    font-size: 0.6rem;
+    filter: drop-shadow(0 0 2px black);
+}
+
+/* Уровень - Слева сверху */
+.h-lvl {
+    position: absolute;
+    top: 3px;
+    left: 3px;
+    font-size: 0.5rem;
+    background: rgba(0, 0, 0, 0.7);
+    color: #fbbf24;
+    padding: 1px 3px;
+    border-radius: 3px;
+}
+
+/* Эмодзи героя - По центру */
+.h-vis {
+    font-size: 2.2rem;
+    /* Оптимальный размер */
+    margin-top: 5px;
+    filter: drop-shadow(0 2px 2px rgba(0, 0, 0, 0.5));
+}
+
+/* Имя героя - Снизу */
+.h-name {
+    font-size: 0.55rem;
+    margin-top: 2px;
+    text-align: center;
+    width: 100%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    /* Троеточие, если не влезает */
+    padding: 0 2px;
+    color: #eee;
+}
+
+/* Карточка героя */
+.hero-card {
+    aspect-ratio: 1 / 1;
+    /* Строгий квадрат */
+    background: rgba(30, 30, 30, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    overflow: hidden;
+    /* Чтобы ничего не вылезало */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.hero-card:active {
+    transform: scale(0.95);
+}
+
+/* Если героя нет в отряде - чуть темнее */
+.hero-card.locked {
+    border: 2px dashed #444;
+    background: rgba(0, 0, 0, 0.5);
+    opacity: 0.7;
+    cursor: default;
+}
+
+.hero-card.locked .hero-card-img {
+    filter: grayscale(1) brightness(0.5);
+    font-size: 2rem;
+}
+
+.hero-card.locked .hero-card-name {
+    color: #777;
+    background: transparent;
+}
+
+/* Эмодзи по центру (сдвинуто чуть вверх, чтобы дать место имени) */
+.hero-card-img {
+    position: absolute;
+    top: 40%;
+    /* Подняли чуть выше (было 45%), чтобы имя не закрывало */
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 2.2rem;
+    filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.5));
+    z-index: 1;
+    pointer-events: none;
+    /* Чтобы клик проходил сквозь эмодзи */
+}
+
+/* Имя внизу */
+.hero-card-name {
+    position: absolute;
+    /* Фиксируем положение */
+    bottom: 0;
+    /* Приклеиваем к самому низу */
+    left: 0;
+    width: 100%;
+
+    background: rgba(0, 0, 0, 0.85);
+    color: #fff;
+    font-size: 0.5rem;
+    text-align: center;
+    padding: 4px 2px;
+    z-index: 2;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    border-top: 1px solid #000;
+    margin: 0;
+    /* Убираем отступы, чтобы плотно сидело */
+}
+
+/* Метка уровня/звезд в верхнем углу */
+.hero-card-lvl {
+    position: absolute;
+    top: 2px;
+    left: 4px;
+    font-size: 0.45rem;
+    color: var(--color-gold);
+    z-index: 2;
+    text-shadow: 1px 1px 0 #000;
+    font-weight: bold;
+}
+
+/* Метка "В отряде" */
+.hero-card-squad {
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 0;
+    height: 0;
+    border-style: solid;
+    border-width: 0 20px 20px 0;
+    border-color: transparent var(--color-gold) transparent transparent;
+    z-index: 3;
+}
+
+.hero-card-squad::after {
+    content: '✓';
+    position: absolute;
+    top: 1px;
+    right: -18px;
+    font-size: 0.5rem;
+    color: #000;
+    font-weight: bold;
+}
+
+/* БОЕВАЯ СЦЕНА */
+.battle-stage {
+    flex: 1;
+    min-height: 0;
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 4px;
+    border: 4px solid #000;
+    box-shadow: inset 0 0 30px #000;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 10px;
+    overflow: hidden;
+    width: 100%;
+}
+
+.fighter-vis {
+    width: 100px;
+    height: 100px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 3.5rem;
+    filter: drop-shadow(0 5px 15px rgba(0, 0, 0, 0.6));
+    transition: transform 0.1s;
+    position: relative;
+    z-index: 10;
+}
+
+.enemies-wrapper {
+    position: absolute;
+    top: 15px;
+    left: 0;
+    width: 100%;
+    padding-right: 15px;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+    pointer-events: none;
+    z-index: 20;
+}
+
+.enemy-unit {
+    pointer-events: auto;
+    text-align: center;
+    position: relative;
+    transition: 0.2s;
+    cursor: pointer;
+}
+
+.enemy-unit.selected {
+    transform: scale(1.15);
+}
+
+.enemy-unit.selected>div:first-child {
+    text-shadow: 0 0 5px #ffff00, 0 0 10px #ffff00;
+}
+
+.hero-container {
+    position: absolute;
+    bottom: 15px;
+    left: 20px;
+    text-align: center;
+    z-index: 20;
+}
+
+.bar-group {
+    width: 140px;
+    height: 32px;
+    margin: 2px auto;
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.bar-state-img {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    transition: none;
+}
+
+.bar-text {
+    position: absolute;
+    top: 6px;
+    width: 100%;
+    text-align: center;
+    color: #fff;
+    text-shadow: 1px 1px 0 #000;
+    font-size: 0.5rem;
+    font-weight: bold;
+    z-index: 5;
+    pointer-events: none;
+}
+
+/* КНОПКИ СКИЛЛОВ */
+.action-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 6px;
+    padding: 10px;
+    border-top: 4px solid #000;
+    flex-shrink: 0;
+    background: rgba(20, 20, 20, 0.95);
+    width: 100%;
+}
+
+.skill-btn {
+    background: #333;
+    border: 3px solid #000;
+    color: #e4e4e7;
+    border-radius: 4px;
+    padding: 4px;
+    font-size: 0.5rem;
+    min-height: 50px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    transition: 0.1s;
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    box-shadow: 3px 3px 0 #000;
+}
+
+.skill-btn:active:not(:disabled) {
+    transform: scale(0.95);
+    box-shadow: none;
+}
+
+/* --- ФИКС: ТЕМНЫЕ КНОПКИ НА КД --- */
+.skill-btn:disabled {
+    filter: grayscale(1) brightness(0.4);
+    opacity: 0.8;
+    cursor: not-allowed;
+    background: #1a1a1a;
+    color: #555;
+    border-color: #444;
+    box-shadow: none;
+}
+
+.t-atk {
+    border-bottom: 3px solid var(--color-hp);
+}
+
+.t-def {
+    border-bottom: 3px solid var(--color-def);
+}
+
+.t-heal {
+    border-bottom: 3px solid var(--color-pure);
+}
+
+.t-ult {
+    border: 2px solid var(--color-gold);
+    background: rgba(251, 191, 36, 0.1);
+}
+
+.squad-selector {
+    display: flex;
+    gap: 8px;
+    justify-content: center;
+    padding: 5px;
+    margin-bottom: 5px;
+    min-height: 50px;
+    flex-shrink: 0;
+    width: 100%;
+}
+
+.squad-thumb {
+    width: 45px;
+    height: 45px;
+    flex-shrink: 0;
+    background: rgba(50, 50, 50, 0.8);
+    border: 3px solid #000;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    cursor: pointer;
+    position: relative;
+    box-shadow: 3px 3px 0 #000;
+}
+
+.squad-thumb.active {
+    border-color: var(--color-gold);
+    transform: translateY(-3px);
+}
+
+/* ВСПЛЫВАЮЩИЙ ТЕКСТ (ФИКС) */
+.float-txt {
+    position: absolute;
+    font-weight: 900;
+    font-size: 1.5rem;
+    animation: float-up 0.8s ease-out forwards;
+    pointer-events: none;
+    z-index: 100000;
+    text-shadow: 2px 2px 0 #000, -2px -2px 0 #000;
+    white-space: nowrap;
+}
+
+@keyframes float-up {
+    0% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateY(-60px) scale(1.1);
+    }
+}
+
+/* QTE OVERLAY */
+.overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 2000;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(5px);
+}
+
+.qte-track {
+    width: 80%;
+    height: 24px;
+    background: #222;
+    border: 4px solid #fff;
+    border-radius: 4px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 4px 4px 0 #000;
+    pointer-events: none;
+}
+
+.qte-zone {
+    position: absolute;
+    left: 40%;
+    width: 20%;
+    height: 100%;
+    background: var(--color-def);
+    opacity: 1;
+}
+
+.qte-cursor {
+    position: absolute;
+    left: 0;
+    height: 100%;
+    width: 8px;
+    background: #fff;
+    box-shadow: 0 0 0 2px #000;
+}
+
+.banner-card {
+    align-items: stretch;
+    padding: 10px;
+}
+
+.banner-btn {
+    width: 100%;
+    margin-top: 10px;
+    display: block;
+}
+
+
+
+/* --- ПАТЧ ИНТЕРФЕЙСА v6 (ФИНАЛЬНЫЙ) --- */
+
+/* 1. УБИРАЕМ "ИНФО" В БОЮ */
+/* Принудительно скрываем псевдоэлемент с иконкой */
+#hero-vis::after {
+    content: none !important;
+    display: none !important;
+}
+
+/* Убираем лишние эффекты, оставляем только курсор */
+#hero-vis {
+    cursor: pointer;
+}
+
+/* 2. КРАСИВОЕ МЕНЮ КВЕСТОВ (КОМПАКТНОЕ) */
+#modal-quests .modal-box {
+    max-width: 320px !important;
+    /* Уменьшили ширину */
+    max-height: 60vh !important;
+    /* Уменьшили высоту (было 80vh) */
+    padding: 15px !important;
+    background: rgba(20, 20, 25, 0.98);
+    /* Более темный фон */
+    border: 2px solid #444;
+}
+
+/* Стили карточки квеста */
+#modal-quests .card {
+    padding: 8px !important;
+    margin-bottom: 6px !important;
+    background: #1a1a1a !important;
+    border: 1px solid #333 !important;
+    box-shadow: none !important;
+}
+
+/* Текст квеста */
+#modal-quests .card div:first-child {
+    font-size: 0.6rem !important;
+    margin-bottom: 2px;
+}
+
+/* Полоска прогресса квеста */
+.quest-bar {
+    height: 6px !important;
+    background: #111 !important;
+    border: 1px solid #444;
+    border-radius: 2px;
+    margin-top: 4px;
+    width: 100%;
+}
+
+.quest-fill {
+    height: 100%;
+    background: var(--color-gold);
+    transition: width 0.3s;
+}
+
+/* 3. КРАСИВЫЙ ЛИДЕРБОРД */
+#modal-leaderboard .modal-box {
+    max-width: 320px !important;
+    max-height: 60vh !important;
+    background: rgba(20, 20, 25, 0.98);
+}
+
+/* Строка игрока в топе */
+.lb-row {
+    display: flex;
+    align-items: center;
+    padding: 6px 8px;
+    margin-bottom: 4px;
+    background: #1a1a1a;
+    border: 1px solid #333;
+    border-radius: 4px;
+    font-size: 0.6rem;
+}
+
+/* Ранг (1, 2, 3...) */
+.lb-rank {
+    width: 25px;
+    font-weight: bold;
+    color: #888;
+}
+
+/* Цвета для топ-3 */
+.lb-row:nth-child(1) {
+    border-color: #ffd700;
+    background: rgba(255, 215, 0, 0.1);
+}
+
+.lb-row:nth-child(1) .lb-rank {
+    color: #ffd700;
+}
+
+/* Золото */
+
+.lb-row:nth-child(2) {
+    border-color: #c0c0c0;
+}
+
+.lb-row:nth-child(2) .lb-rank {
+    color: #c0c0c0;
+}
+
+/* Серебро */
+
+.lb-row:nth-child(3) {
+    border-color: #cd7f32;
+}
+
+.lb-row:nth-child(3) .lb-rank {
+    color: #cd7f32;
+}
+
+/* Бронза */
+
+/* Имя игрока */
+.lb-name {
+    flex: 1;
+    text-align: left;
+    color: #fff;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding-right: 10px;
+}
+
+/* Счет (этаж) */
+.lb-score {
+    color: var(--color-gold);
+    font-weight: bold;
+}
+
+/* --- ПАТЧ ИНТЕРФЕЙСА v7 (ФИНАЛ) --- */
+
+/* 1. КРАСИВЫЕ КНОПКИ ВКЛАДОК КВЕСТОВ */
+#modal-quests .tab-btn {
+    flex: 1;
+    background: #222;
+    border: 3px solid #000;
+    border-bottom: none;
+    color: #777;
+    font-size: 0.7rem;
+    padding: 10px 0;
+    cursor: pointer;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+    /* Чтобы перекрывала линию */
+    z-index: 1;
+}
+
+#modal-quests .tab-btn.active {
+    background: #333;
+    color: var(--color-gold);
+    border-top: 3px solid var(--color-gold);
+    z-index: 10;
+}
+
+/* Линия под вкладками */
+#modal-quests div[style*="border-bottom"] {
+    border-bottom: 3px solid #000 !important;
+    background: transparent;
+    gap: 5px;
+}
+
+/* 2. ЭКРАН ПОБЕДЫ (ЦЕНТРИРОВАНИЕ) */
+#modal-win .modal-box {
+    text-align: center !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Принудительно центрируем эмодзи трофея */
+#modal-win .modal-box div {
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* 3. ФИКС QTE (На случай если проблема в CSS) */
+#qte-overlay {
+    /* Самый высокий приоритет */
+    z-index: 99999 !important;
+    /* Убеждаемся, что он кликабелен */
+    pointer-events: auto !important;
+    background: rgba(0, 0, 0, 0.85);
+}
+
+/* Слой клика внутри QTE */
+#qte-overlay>div[onclick] {
+    cursor: crosshair;
+    /* Меняем курсор на прицел */
+}
+
+/* --- ПАТЧ v8 (СКРОЛЛ И QTE) --- */
+
+/* 1. ФИКС СКРОЛЛА КВЕСТОВ */
+#modal-quests .modal-box {
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    /* Сам ящик не скроллится, скроллится контент */
+}
+
+.quest-tab-content {
+    flex: 1 !important;
+    /* Занимает все свободное место */
+    overflow-y: auto !important;
+    /* Включаем скролл по вертикали */
+    width: 100% !important;
+    padding-right: 5px;
+    /* Чтобы скроллбар не наезжал на текст */
+    margin-top: 10px;
+}
+
+/* Красивый скроллбар (опционально) */
+.quest-tab-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.quest-tab-content::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 3px;
+}
+
+.quest-tab-content::-webkit-scrollbar-track {
+    background: #111;
+}
+
+/* 2. ФИКС QTE (ГЛАВНЫЙ) */
+/* Убеждаемся, что оверлей перекрывает ВСЁ и принимает клики */
+#qte-overlay {
+    z-index: 20000 !important;
+    pointer-events: auto !important;
+    cursor: crosshair !important;
+    background: rgba(0, 0, 0, 0.85) !important;
+}
+
+/* Зона и курсор должны быть видимы */
+.qte-track {
+    z-index: 20001 !important;
+    pointer-events: none;
+    /* Чтобы клик проходил сквозь полоску в оверлей */
+}
+
+/* --- ФИКС QTE (ДВИЖЕНИЕ) --- */
+
+/* 1. Сам курсор (белая палочка) */
+.qte-cursor {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 8px !important;
+    /* Ширина палочки */
+    height: 100% !important;
+    /* Высота во всю полоску */
+    background: #ffffff !important;
+    border: 2px solid #000000 !important;
+    /* Черная обводка для контраста */
+    z-index: 20005 !important;
+    box-shadow: 0 0 5px #fff;
+    transform: translateX(-50%);
+    /* Центрируем палочку по координате */
+}
+
+/* 2. ИНСТРУКЦИЯ ДВИЖЕНИЯ (Этого не хватало!) */
+@keyframes qte-move {
+    0% {
+        left: 2%;
+    }
+
+    100% {
+        left: 98%;
+    }
+}
+
+/* 3. Зона попадания (Красная/Синяя) */
+.qte-zone {
+    z-index: 20004 !important;
+    /* Должна быть под курсором */
+    /* Остальные стили задаются через JS (цвет и позиция) */
+}
+
+/* --- ПАТЧ v7 (ХП БАРЫ И БАЛАНС UI) --- */
+
+/* 1. Возвращаем полоску ХП врагам */
+.bar-row {
+    width: 100%;
+    height: 6px !important;
+    /* Была проблема с высотой */
+    background: #333;
+    border: 1px solid #000;
+    border-radius: 2px;
+    overflow: hidden;
+    margin-top: 4px;
+}
+
+.bar-fill {
+    height: 100% !important;
+    display: block !important;
+    transition: width 0.2s;
+}
+
+/* 2. Ровняем врагов (чтобы значки не косило) */
+.enemy-unit {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 70px;
+    /* Фикс ширины, чтобы не прыгало */
+}
+
+/* 3. Фикс отображения текста волны */
+#turn-indicator {
+    min-width: 80px;
+    text-align: center;
+}
+
+/* --- ПАТЧ v8: ФИКС ГЕРОЯ, АДМИНКИ И ПЕРЕВОД --- */
+
+/* 1. ГЕРОЙ ПО ЦЕНТРУ */
+.hero-container {
+    left: 20px !important;
+    /* Отступ слева */
+    bottom: 20px !important;
+    /* Отступ снизу */
+    transform: none !important;
+    /* Убираем центрирование */
+    width: auto !important;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Увеличим героя, раз он казался маленьким */
+#hero-vis {
+    font-size: 4rem !important;
+}
+
+/* 2. АДМИН ПАНЕЛЬ НА ВЕСЬ ЭКРАН */
+#admin-panel {
+    position: fixed !important;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(10, 10, 10, 0.98) !important;
+    z-index: 100000 !important;
+    /* Поверх всего */
+    display: none;
+    flex-direction: column;
+    padding: 20px;
+    overflow-y: auto;
+}
+
+#admin-panel.active {
+    display: flex !important;
+}
+
+/* 3. ХП БАР ИГРОКА (КАК У ВРАГА) */
+/* Скрываем старые картинки */
+#hero-hp-bar.bar-state-img,
+#hero-ult-bar.bar-state-img {
+    width: 100%;
+    height: 100%;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+/* Новые полоски для игрока */
+.player-bar-track {
+    width: 120px;
+    height: 10px;
+    background: #333;
+    border: 2px solid #000;
+    border-radius: 4px;
+    margin: 2px 0;
+    position: relative;
+    overflow: hidden;
+}
+
+.player-bar-fill {
+    height: 100%;
+    transition: width 0.2s;
+}
+
+.pb-hp {
+    background: var(--color-hp);
+}
+
+.pb-ult {
+    background: var(--color-energy);
+}
+
+/* --- ФИКС ТОЛПЫ ВРАГОВ --- */
+/* Если врагов много, они уменьшаются */
+.enemy-unit {
+    width: 65px;
+    /* Чуть уже база */
+    font-size: 0.8rem;
+    transition: all 0.2s;
+}
+
+/* Эффект, когда выбираешь цель */
+.enemy-unit:active {
+    transform: scale(0.95);
+}
+
+/* Подгоняем контейнер */
+.enemies-wrapper {
+    gap: 4px !important;
+    /* Меньше отступы */
+    padding-right: 5px !important;
+    justify-content: center !important;
+    /* По центру, а не справа */
+}
+
+/* Уменьшаем шрифт эмодзи для толпы */
+.enemy-unit>div:first-child {
+    font-size: 3rem !important;
+    /* Было 4rem */
+}
+
+/* --- КЛАНОВЫЙ ИНТЕРФЕЙС --- */
+
+/* Карточка Босса */
+.raid-boss-card {
+    background: linear-gradient(180deg, #1a1a1a, #000);
+    border: 2px solid #333;
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: 20px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+}
+
+/* Разные цвета для разных боссов */
+.boss-titan {
+    border-color: #8b5cf6;
+    box-shadow: 0 0 10px rgba(139, 92, 246, 0.3);
+}
+
+.boss-leviathan {
+    border-color: #3b82f6;
+    box-shadow: 0 0 10px rgba(59, 130, 246, 0.3);
+}
+
+.boss-ghost {
+    border-color: #10b981;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.3);
+}
+
+.raid-hp-track {
+    width: 100%;
+    height: 12px;
+    background: #222;
+    border: 1px solid #444;
+    border-radius: 6px;
+    margin-top: 10px;
+    overflow: hidden;
+}
+
+.raid-hp-fill {
+    height: 100%;
+    background: #ef4444;
+    transition: width 0.5s;
+}
+
+/* Чат */
+.clan-chat-box {
+    height: 180px;
+    background: rgba(0, 0, 0, 0.6);
+    border: 1px solid #333;
+    border-radius: 5px;
+    padding: 10px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.chat-msg {
+    font-size: 0.6rem;
+    line-height: 1.4;
+}
+
+.chat-msg .name {
+    font-weight: bold;
+    color: var(--color-gold);
+    margin-right: 5px;
+}
+
+.chat-msg .text {
+    color: #ddd;
+}
+
+/* Список участников */
+.member-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #111;
+    padding: 8px;
+    margin-bottom: 5px;
+    border: 1px solid #333;
+    border-radius: 4px;
+}
+
+/* --- КРАСИВЫЙ ЧАТ КЛАНА --- */
+.clan-chat-header {
+    text-align: center;
+    color: #888;
+    font-weight: bold;
+    letter-spacing: 1px;
+}
+
+.clan-chat-box {
+    overflow-y: auto;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    /* Скроллбар */
+    scrollbar-width: thin;
+    scrollbar-color: #444 #222;
+}
+
+.chat-msg {
+    font-size: 0.65rem;
+    line-height: 1.4;
+    padding: 4px 6px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 4px;
+    border-left: 2px solid var(--color-gold);
+}
+
+.chat-msg .name {
+    color: var(--color-gold);
+    font-weight: bold;
+    margin-right: 4px;
+    margin-left: 4px;
+}
+
+.chat-msg .text {
+    color: #eee;
+}
+
+/* Кнопка "Внести" и прочие мелкие */
+.btn-small {
+    background: #444;
+    border: 1px solid #000;
+    color: #fff;
+    padding: 5px 10px;
+    font-size: 0.6rem;
+    cursor: pointer;
+    border-radius: 3px;
+}
+
+.btn-small:active {
+    transform: translateY(2px);
+}
+
+/* --- КОСМЕТИКА v7.0 --- */
+
+/* --- style.css --- */
+
+.class-badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    font-size: 0.6rem;
+    z-index: 5;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 50%;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #555;
+    box-shadow: 1px 1px 0 #000;
+}
+
+/* --- style.css --- */
+
+/* 1. ГЛИТЧ ЭФФЕКТ (Дергание экрана) */
+.glitch-effect {
+    animation: glitch-anim 0.2s cubic-bezier(.25, .46, .45, .94) both infinite;
+    filter: invert(1) hue-rotate(90deg);
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0)
+    }
+
+    20% {
+        transform: translate(-5px, 5px)
+    }
+
+    40% {
+        transform: translate(-5px, -5px)
+    }
+
+    60% {
+        transform: translate(5px, 5px)
+    }
+
+    80% {
+        transform: translate(5px, -5px)
+    }
+
+    100% {
+        transform: translate(0)
+    }
+}
+
+/* 2. DARKER YET DARKER (Полная тьма) */
+.darker-yet-darker #bg-layer {
+    filter: grayscale(100%) contrast(200%) brightness(0.1) !important;
+    transition: filter 1s ease;
+}
+
+/* 3. ОСОБЫЙ ТЕКСТ УРОНА ГАСТЕРА */
+.dmg-text[data-type="gaster"] {
+    font-family: 'Courier New', monospace;
+    text-shadow: 2px 2px 0px #000;
+    font-weight: bold;
+    letter-spacing: 2px;
+}
+
+/* --- Добавить в конец style.css --- */
+
+/* Темная атмосфера Гастера */
+.darker-yet-darker #bg-layer {
+    filter: grayscale(1) contrast(1.5) brightness(0.2) !important;
+}
+
+/* Анимация Глитча */
+.glitch-mode {
+    animation: glitch-anim 0.2s infinite;
+    filter: invert(1);
+}
+
+/* --- Добавить в style.css --- */
+.ws-ut {
+    border-color: #fff;
+    background: linear-gradient(180deg, #000 30%, #444 100%);
+    box-shadow: 0 4px 0 #fff;
+    color: #fff;
+}
+
+.ws-ut div:first-child {
+    text-shadow: 0 0 10px #ff0000;
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-5px, 5px);
+    }
+
+    40% {
+        transform: translate(-5px, -5px);
+    }
+
+    60% {
+        transform: translate(5px, 5px);
+    }
+
+    80% {
+        transform: translate(5px, -5px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* 2. ЭФФЕКТЫ ГАСТЕРА */
+/* Класс для затемнения экрана (Darker Yet Darker) */
+.darker-yet-darker {
+    filter: grayscale(1) contrast(1.2) brightness(0.4) !important;
+    transition: filter 2s ease;
+}
+
+/* Глитч-текст */
+.glitch-text {
+    animation: glitch-anim 0.3s infinite;
+    color: red;
+    text-shadow: 2px 0 blue;
+}
+
+@keyframes glitch-anim {
+    0% {
+        transform: translate(0);
+    }
+
+    20% {
+        transform: translate(-2px, 2px);
+    }
+
+    40% {
+        transform: translate(-2px, -2px);
+    }
+
+    60% {
+        transform: translate(2px, 2px);
+    }
+
+    80% {
+        transform: translate(2px, -2px);
+    }
+
+    100% {
+        transform: translate(0);
+    }
+}
+
+/* Мертвый герой в селекторе отряда */
+.squad-thumb.dead {
+    filter: grayscale(1) brightness(0.5);
+    border-color: #444 !important;
+    opacity: 0.7;
+    pointer-events: none;
+    /* Чтобы нельзя было выбрать */
+}
+
+/* Синий Экран Смерти Гастера */
+.bsod-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #0000AA;
+    color: #fff;
+    z-index: 999999;
+    padding: 20px;
+    font-family: 'Courier New', monospace;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+}
+
+/* Пустой бар маны */
+#hero-ult-bar.bar-state-img[style*="mp_0.png"] {
+    opacity: 0.5;
+    /* Делаем пустой бар тусклым */
+}
+
+/* 3. АТМОСФЕРА БОЯ (UNDERTALE) */
+/* Делаем фон черно-белым для UT боев */
+.ut-mode #bg-layer {
+    filter: grayscale(1) brightness(0.5);
+}
+
+.ut-mode .enemy-unit {
+    filter: grayscale(1) contrast(1.5);
+}
+
+/* --- ЭФФЕКТЫ ГАСТЕРА --- */
+
+/* 1. Бластер (Вспышка экрана) */
+.flash-red {
+    animation: flash-anim 0.2s 2;
+}
+
+@keyframes flash-anim {
+    0% {
+        background: #000;
+    }
+
+    50% {
+        background: #ff0000;
+        filter: invert(1);
+    }
+
+    100% {
+        background: #000;
+    }
+}
+
+/* 2. Void Slash (Разрез экрана) */
+.void-cut {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: white;
+    clip-path: polygon(0 0, 100% 0, 100% 45%, 0 55%);
+    z-index: 9999;
+    animation: cut-anim 0.3s forwards;
+    opacity: 0;
+}
+
+@keyframes cut-anim {
+    0% {
+        opacity: 1;
+        transform: scaleY(0);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scaleY(1);
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* 3. Инверсия (Для Rewrite) */
+.invert-screen {
+    animation: invert-anim 0.5s;
+}
+
+@keyframes invert-anim {
+    0% {
+        filter: invert(0);
+    }
+
+    50% {
+        filter: invert(1);
+    }
+
+    100% {
+        filter: invert(0);
+    }
+}
+
+/* --- НОВЫЕ ЭФФЕКТЫ ГАСТЕРА --- */
+
+/* 1. Darker Yet Darker (Пульсация Бездны) */
+.void-pulse {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(circle, transparent 30%, #000 90%);
+    box-shadow: inset 0 0 100px #000;
+    z-index: 9998;
+    animation: pulse-void 1.5s ease-in-out;
+    pointer-events: none;
+}
+
+@keyframes pulse-void {
+    0% {
+        opacity: 0;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(0.95);
+    }
+
+    100% {
+        opacity: 0;
+        transform: scale(1.1);
+    }
+}
+
+.float-text {
+    position: absolute;
+    font-size: 1.2rem;
+    font-weight: bold;
+    text-shadow: 1px 1px 0 #000;
+    pointer-events: none;
+    /* Чтобы сквозь текст можно было кликать */
+    animation: floatUp 0.8s forwards;
+    /* Анимация полета */
+}
+
+@keyframes floatUp {
+    0% {
+        transform: translateY(0) scale(1);
+        opacity: 1;
+    }
+
+    100% {
+        transform: translateY(-40px) scale(1.2);
+        /* Улетает вверх */
+        opacity: 0;
+        /* И исчезает */
+    }
+}
+
+/* 2. STOP (Остановка времени / Негатив) */
+.time-stop {
+    animation: stop-anim 0.2s forwards;
+}
+
+@keyframes stop-anim {
+    0% {
+        filter: invert(0) grayscale(0);
+    }
+
+    50% {
+        filter: invert(1) grayscale(1);
+    }
+
+    100% {
+        filter: invert(0) grayscale(1) contrast(1.5);
+    }
+}
+
+/* 3. Darkness (Полная тьма) */
+.total-darkness {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 9990;
+    animation: fade-dark 1s forwards;
+}
+
+@keyframes fade-dark {
+    0% {
+        opacity: 0;
+    }
+
+    50% {
+        opacity: 0.9;
+    }
+
+    100% {
+        opacity: 0;
+    }
+}
+
+/* --- ФИКС ОТОБРАЖЕНИЯ НА ПК --- */
+@media (min-width: 500px) {
+    body {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: #202020;
+        height: 100vh;
+        margin: 0;
+        overflow: hidden;
+        /* Убираем скролл у body */
+    }
+
+    .app {
+        position: relative;
+        width: 400px !important;
+        /* Фиксированная ширина */
+        height: 800px !important;
+        /* Фиксированная высота */
+        max-height: 90vh !important;
+        /* Чтобы влезало в экраны ноутов */
+        border-radius: 20px;
+        box-shadow: 0 0 50px rgba(0, 0, 0, 0.8);
+        border: 4px solid #000;
+        margin: auto;
+        overflow: hidden;
+        /* Скрываем всё, что вылезает за телефон */
+    }
+}
+
+/* --- CRIT SYSTEM (JET SET STYLE) --- */
+.crit-text {
+    position: absolute;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #ff0055;
+    text-shadow: 2px 2px 0px #fff, 4px 4px 0px #000;
+    font-style: italic;
+    transform: skew(-10deg) scale(0);
+    animation: crit-pop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    pointer-events: none;
+    z-index: 1000;
+    white-space: nowrap;
+}
+
+@keyframes crit-pop {
+    0% {
+        transform: skew(-10deg) scale(0) translateY(0);
+        opacity: 0;
+    }
+
+    50% {
+        transform: skew(-10deg) scale(1.5) translateY(-20px);
+        opacity: 1;
+    }
+
+    100% {
+        transform: skew(-10deg) scale(1.2) translateY(-40px);
+        opacity: 0;
+    }
+}
+
+.crit-flash {
+    animation: flash-white 0.1s;
+}
+
+@keyframes flash-white {
+    0% {
+        filter: brightness(1);
+    }
+
+    50% {
+        filter: brightness(2) contrast(2);
+    }
+
+    100% {
+        filter: brightness(1);
+    }
+}
