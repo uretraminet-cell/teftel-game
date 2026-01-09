@@ -3070,17 +3070,18 @@ function doAction(qteResult) {
 
     // 6. ПРИМЕНЕНИЕ К ЦЕЛЯМ
     targets.forEach(trg => {
+        // 🔥 FIX: Объявляем enemyEl и effectY в начале, чтобы они были доступны везде
+        const enemyIdx = battle.enemies.indexOf(trg);
+        const enemyEl = document.getElementById(`enemy-${enemyIdx}`);
+        let effectY = 200;
+        if (enemyEl) {
+            const rect = enemyEl.getBoundingClientRect();
+            effectY = rect.top - 20; // Выше эмодзи
+        }
+        
         // --- СТАТУСЫ ---
         if (pendingAct.eff && typeof pendingAct.eff === 'object') {
             const e = pendingAct.eff;
-            // 🔥 FIX: Эффекты показываем выше эмодзи врага
-            const enemyIdx = battle.enemies.indexOf(trg);
-            const enemyEl = document.getElementById(`enemy-${enemyIdx}`);
-            let effectY = 200;
-            if (enemyEl) {
-                const rect = enemyEl.getBoundingClientRect();
-                effectY = rect.top - 20; // Выше эмодзи
-            }
             
             if (e.t === 'stun') { trg.stun = (trg.stun || 0) + e.d; showFloatText("💤 STUN", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#ffff00', 'effect'); }
             if (e.t === 'blind') { trg.blind = (trg.blind || 0) + e.d; showFloatText("👁️ BLIND", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#888', 'effect'); }
