@@ -128,7 +128,7 @@ const ACHIEVEMENTS_DB = [
     { id: 'soul_master', name: 'Повелитель Душ', desc: 'Пройди все испытания душ', cond: (s) => (s.quests.soulTrials || 0) >= 7, title: 'Душа', color: '#ec4899' } // Новая
 ];
 
-let battle = { active: false, mode: 'tower', turn: 'player', enemies: [], team: {}, turnId: null, phase: 'idle', processing: false, targetIdx: 0, activeSynergies: [], teamGauge: 0 };
+let battle = { active: false, mode: 'tower', turn: 'player', enemies: [], team: {}, turnId: null, phase: 'idle', processing: false, targetIdx: 0, activeSynergies: [], teamGauge: 0, turnCount: 0 };
 let pendingAct = null; let pendingIdx = -1;
 let selectedHeroId = null;
 let isMusicOn = false;
@@ -1951,6 +1951,7 @@ window.startBattle = (floorNum, enemyData = null) => {
     window.scrollTo(0, 0);
 
     battle.active = true;
+    battle.turnCount = 0; // Инициализация счетчика ходов
     battle.teamGauge = 0;
     battle.processing = false; // Разблокируем кнопки
     battle.turn = 'player';    // Всегда ходит игрок первым
@@ -2016,7 +2017,12 @@ window.startBattle = (floorNum, enemyData = null) => {
             form: null, stats: s, stacks: 0, mahoragaTimer: 0,
             reviveUsed: false, immortalTimer: 0,
             shield: 0, stun: 0, burn: 0, bleed: 0, blind: 0, poison: 0, poisonVal: 0,
-            def_down: 0 // Добавил счетчик дебаффа защиты
+            def_down: 0, // Добавил счетчик дебаффа защиты
+            // Новые эффекты
+            guilty: 0, electric_mark: 0, frozen: 0, silence: 0, parasite: 0, charm: 0,
+            wither: 0, birdcage: 0, futureSight: 0,
+            energyCharges: 0, electricGod: false, mythicalForm: false, constructShield: 0,
+            counter_electric: 0
         };
     });
     battle.turnId = st.squad[0];
@@ -2685,6 +2691,31 @@ function doAction(qteResult) {
             if (hero.poisonVal > 0) showFloatText(`-${hero.poisonVal} ☠️`, 150, 250, '#a855f7');
             hero.poison--;
         }
+
+        // Иссушение (wither)
+        if (hero.wither > 0) {
+            const witherDmg = Math.floor(hero.maxHp * 0.04); // 4% от макс ХП
+            hero.curHp = Math.max(0, hero.curHp - witherDmg);
+            if (witherDmg > 0) showFloatText(`-${witherDmg} 🐊`, 150, 250, '#d4a574');
+            hero.wither--;
+        }
+
+        // Птичья клетка (birdcage)
+        if (hero.birdcage > 0) {
+            const cageDmg = Math.floor(hero.maxHp * 0.06); // 6% от макс ХП
+            hero.curHp = Math.max(0, hero.curHp - cageDmg);
+            if (cageDmg > 0) showFloatText(`-${cageDmg} 🦩`, 150, 250, '#e879f9');
+            hero.birdcage--;
+        }
+
+        // Снижаем счетчики эффектов
+        if (hero.electric_mark > 0) hero.electric_mark--;
+        if (hero.guilty > 0) hero.guilty--;
+        if (hero.frozen > 0) hero.frozen--;
+        if (hero.silence > 0) hero.silence--;
+        if (hero.parasite > 0) hero.parasite--;
+        if (hero.charm > 0) hero.charm--;
+        if (hero.futureSight > 0) hero.futureSight--;
     });
     
     // Обрабатываем эффекты на врагах
@@ -2713,6 +2744,30 @@ function doAction(qteResult) {
             if (enemy.poisonVal > 0) showFloatText(`-${enemy.poisonVal} ☠️`, 200, 100, '#06b6d4');
             enemy.poison--;
         }
+
+        // Иссушение (wither)
+        if (enemy.wither > 0) {
+            const witherDmg = Math.floor(enemy.max * 0.04);
+            enemy.hp = Math.max(0, enemy.hp - witherDmg);
+            if (witherDmg > 0) showFloatText(`-${witherDmg} 🐊`, 200, 100, '#d4a574');
+            enemy.wither--;
+        }
+
+        // Птичья клетка (birdcage)
+        if (enemy.birdcage > 0) {
+            const cageDmg = Math.floor(enemy.max * 0.06);
+            enemy.hp = Math.max(0, enemy.hp - cageDmg);
+            if (cageDmg > 0) showFloatText(`-${cageDmg} 🦩`, 200, 100, '#e879f9');
+            enemy.birdcage--;
+        }
+
+        // Снижаем счетчики эффектов
+        if (enemy.electric_mark > 0) enemy.electric_mark--;
+        if (enemy.guilty > 0) enemy.guilty--;
+        if (enemy.frozen > 0) enemy.frozen--;
+        if (enemy.silence > 0) enemy.silence--;
+        if (enemy.parasite > 0) enemy.parasite--;
+        if (enemy.charm > 0) enemy.charm--;
     });
 
     // 🔥 FIX: Зеленая душа - хилит всех на 50% от атаки действующего героя каждый ход
@@ -3087,6 +3142,11 @@ function doAction(qteResult) {
                     showFloatText(`💥 БАФФ КРИТА ОТРЯДУ!`, window.innerWidth / 2, window.innerHeight * 0.3, '#ef4444');
                 }
             }
+            if (e.t === 'counter_electric') {
+                // Электрический контр-урон от Кашимо
+                h.counter_electric = (h.counter_electric || 0) + (e.v || 30);
+                showFloatText("⚡ ЭМ ПОЛЕ", 200, 200, '#ffff00');
+            }
         }
 
         // --- АТАКА / УЛЬТА ---
@@ -3188,6 +3248,187 @@ function doAction(qteResult) {
             if (pendingAct.mech === 'fire') {
                 trg.burn = (trg.burn || 0) + 3;
                 showFloatText("🔥 MAGMA", 200, 250, 'orange');
+            }
+
+            // === НОВЫЕ МЕХАНИКИ ПЕРСОНАЖЕЙ ===
+
+            // 1. ХИГУРУМА: Система суда (judgement, execute_guilty, silence)
+            if (pendingAct.mech === 'judgement') {
+                trg.guilty = (trg.guilty || 0) + (pendingAct.eff?.d || 5);
+                showFloatText("⚖️ ВИНОВЕН", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#ffd700', 'effect');
+            }
+            if (pendingAct.mech === 'execute_guilty') {
+                // Урон x2 по помеченным виновным
+                if (trg.guilty && trg.guilty > 0) {
+                    finalDmg = Math.floor(finalDmg * 2);
+                    showFloatText("⚖️ КАЗНЬ!", 200, 200, '#ff0000');
+                    trg.guilty = 0; // Снимаем метку после казни
+                }
+            }
+            if (pendingAct.mech === 'judgement_domain') {
+                trg.silence = (trg.silence || 0) + (pendingAct.eff?.d || 2);
+                showFloatText("🔇 SILENCE", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#8b5cf6', 'effect');
+            }
+
+            // 2. КАШИМО: Цепная молния (electric_chain, electric_god, electric_mark)
+            if (pendingAct.eff && pendingAct.eff.t === 'electric_mark') {
+                trg.electric_mark = (trg.electric_mark || 0) + pendingAct.eff.d;
+                showFloatText("⚡ ЗАРЯД", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#ffff00', 'effect');
+            }
+            if (pendingAct.mech === 'electric_chain') {
+                // Бьет по всем помеченным электричеством
+                const markedEnemies = battle.enemies.filter(e => e.hp > 0 && e.electric_mark && e.electric_mark > 0);
+                if (markedEnemies.length > 0) {
+                    markedEnemies.forEach(marked => {
+                        const chainDmg = Math.floor(finalDmg * 0.8); // 80% урона по цепочке
+                        marked.hp = Math.max(0, marked.hp - chainDmg);
+                        marked.electric_mark = Math.max(0, (marked.electric_mark || 0) - 1);
+                        const markedIdx = battle.enemies.indexOf(marked);
+                        const markedEl = document.getElementById(`enemy-${markedIdx}`);
+                        if (markedEl) {
+                            showFloatText(`-${chainDmg} ⚡`, markedEl.getBoundingClientRect().left + 20, markedEl.getBoundingClientRect().top, '#ffff00');
+                        }
+                    });
+                    showFloatText("⚡ ЦЕПНАЯ МОЛНИЯ!", 200, 150, '#ffff00');
+                }
+            }
+            if (pendingAct.mech === 'electric_god') {
+                // Трансформация в Бога Молний
+                h.electricGod = true;
+                h.immortalTimer = 3; // Бессмертие на 3 хода
+                h.curUlt = 10; // Полная ульта
+                showFloatText("⚡ БОГ МОЛНИЙ!", 200, 100, '#ffff00');
+                // Станит всех врагов
+                battle.enemies.forEach(e => {
+                    if (e.hp > 0) e.stun = (e.stun || 0) + 1;
+                });
+            }
+
+            // 3. ЁРОДЗУ: Конструирование (construct, perfect_construct)
+            if (pendingAct.mech === 'construct') {
+                // Создает конструкцию (щит + бафф)
+                h.constructShield = (h.constructShield || 0) + 30;
+                h.shield = (h.shield || 0) + 30;
+                showFloatText("🔧 КОНСТРУКЦИЯ", 200, 200, '#9ca3af');
+            }
+            if (pendingAct.mech === 'perfect_construct') {
+                // Идеальная Сфера - чистый урон
+                finalDmg = Math.floor(h.stats.atk * pendingAct.v);
+                showFloatText("🔧 ИДЕАЛЬНАЯ СФЕРА!", 200, 200, '#ffffff');
+            }
+
+            // 4. УРАУМЕ: Ледяная тюрьма (ice_prison, ice_shatter)
+            if (pendingAct.mech === 'ice_prison') {
+                trg.frozen = (trg.frozen || 0) + 2; // Заморозка на 2 хода
+                trg.stun = (trg.stun || 0) + 1;
+                showFloatText("❄️ ЗАМОРОЖЕН", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#00ffff', 'effect');
+            }
+            if (pendingAct.mech === 'ice_shatter') {
+                // x3 урон по замороженным
+                if (trg.frozen && trg.frozen > 0) {
+                    finalDmg = Math.floor(finalDmg * 3);
+                    trg.frozen = 0; // Снимаем заморозку после разбивания
+                    showFloatText("❄️ РАЗБИТ!", 200, 200, '#00ffff');
+                }
+            }
+
+            // 5. РЮ: Разряд энергии (charge_up, discharge, max_discharge)
+            if (pendingAct.mech === 'charge_up') {
+                h.energyCharges = (h.energyCharges || 0) + 1;
+                showFloatText(`💥 ЗАРЯД +1 (${h.energyCharges})`, 200, 200, '#f97316');
+            }
+            if (pendingAct.mech === 'discharge') {
+                // Урон зависит от количества зарядов
+                const charges = h.energyCharges || 0;
+                finalDmg = Math.floor(finalDmg * (1 + charges * 0.5)); // +50% за каждый заряд
+                h.energyCharges = 0; // Сбрасываем заряды
+                showFloatText(`💥 РАЗРЯД x${1 + charges * 0.5}!`, 200, 200, '#f97316');
+            }
+            if (pendingAct.mech === 'max_discharge') {
+                // Максимальный выброс - урон растет с каждым ходом
+                const turnCount = battle.turnCount || 1;
+                const multiplier = 1 + (turnCount * 0.2); // +20% за каждый ход
+                finalDmg = Math.floor(finalDmg * multiplier);
+                h.energyCharges = 0;
+                showFloatText(`💥 МАКС. ВЫБРОС x${multiplier.toFixed(1)}!`, 200, 200, '#f97316');
+            }
+
+            // 6. ЯМАТО: Мифический страж (mythical_guardian)
+            if (pendingAct.mech === 'mythical_guardian') {
+                // Превращение в священного зверя
+                h.mythicalForm = true;
+                h.buffs.atk_up = (h.buffs.atk_up || 0) + 3;
+                h.buffs.def_up = 3;
+                // Бафф всей команде
+                Object.values(battle.team).forEach(ally => {
+                    if (ally.curHp > 0) {
+                        ally.buffs = ally.buffs || {};
+                        ally.buffs.atk_up = 3;
+                        ally.buffs.def_up = 3;
+                    }
+                });
+                showFloatText("🐺 МИФИЧЕСКИЙ СТРАЖ!", 200, 100, '#c084fc');
+            }
+
+            // 7. САБО: Разрушение брони (armor_break)
+            if (pendingAct.mech === 'armor_break') {
+                // Игнорирует защиту врага
+                finalDmg = Math.floor(baseDmg * mult);
+                trg.def_down = (trg.def_down || 0) + (pendingAct.eff?.d || 3);
+                showFloatText("🔥 ПРОБИТИЕ БРОНИ!", 200, 200, '#ef4444');
+            }
+
+            // 8. ДОФЛАМИНГО: Контроль (parasite, birdcage, charm)
+            if (pendingAct.mech === 'parasite') {
+                trg.parasite = (trg.parasite || 0) + (pendingAct.eff?.d || 2);
+                trg.charm = (trg.charm || 0) + (pendingAct.eff?.d || 2);
+                showFloatText("🦩 ПАРАЗИТ!", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#e879f9', 'effect');
+            }
+            if (pendingAct.mech === 'birdcage') {
+                // Птичья клетка - урон по времени всем врагам
+                battle.enemies.forEach(e => {
+                    if (e.hp > 0) {
+                        e.birdcage = (e.birdcage || 0) + 3; // 3 хода урона
+                        e.poison = (e.poison || 0) + 3;
+                        e.poisonVal = (e.poisonVal || 0) + (pendingAct.eff?.v || 100);
+                    }
+                });
+                showFloatText("🦩 ПТИЧЬЯ КЛЕТКА!", 200, 150, '#e879f9');
+            }
+
+            // 9. КРОКОДАЙЛ: Высушивание песком (sand_drain, sand_storm, wither)
+            if (pendingAct.mech === 'sand_drain') {
+                trg.wither = (trg.wither || 0) + (pendingAct.eff?.d || 3);
+                trg.atk_down = (trg.atk_down || 0) + 2; // Слабость
+                showFloatText("🐊 ИССУШЕНИЕ", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#d4a574', 'effect');
+            }
+            if (pendingAct.mech === 'sand_storm') {
+                // Песчаная буря - АОЕ + иссушение
+                battle.enemies.forEach(e => {
+                    if (e.hp > 0) {
+                        e.wither = (e.wither || 0) + (pendingAct.eff?.d || 3);
+                        e.acc_down = (e.acc_down || 0) + 2; // Снижение точности
+                    }
+                });
+                showFloatText("🐊 ПЕСЧАНАЯ БУРЯ!", 200, 150, '#d4a574');
+            }
+
+            // 10. КАТАКУРИ: Предвидение будущего (perfect_counter, future_sight)
+            if (pendingAct.eff && pendingAct.eff.t === 'future_sight') {
+                h.futureSight = (h.futureSight || 0) + pendingAct.eff.d;
+                h.buffs.evade_up = 100; // 100% уворот
+                showFloatText("🍩 БУДУЩЕЕ ВИДЕНИЕ", 200, 200, '#ec4899');
+            }
+            if (pendingAct.mech === 'perfect_counter') {
+                // Совершенный уворот команде + контратака
+                Object.values(battle.team).forEach(ally => {
+                    if (ally.curHp > 0) {
+                        ally.buffs = ally.buffs || {};
+                        ally.buffs.evade_up = 2; // 2 хода уворота
+                        ally.counter = (ally.counter || 0) + 2; // Контратака
+                    }
+                });
+                showFloatText("🍩 СОВЕРШЕННЫЙ УВОРОТ!", 200, 150, '#ec4899');
             }
 
             // 🔥 LEVIATHAN DAMAGE LIMIT (Лимит урона за один удар)
@@ -3413,6 +3654,10 @@ function doAction(qteResult) {
     if (h.buffs.atk_up > 0) h.buffs.atk_up--;
     if (h.buffs.evade_up > 0) h.buffs.evade_up--;
 
+    // Увеличиваем счетчик ходов для max_discharge
+    if (!battle.turnCount) battle.turnCount = 0;
+    battle.turnCount++;
+
     // 🔥 КРАСНАЯ ДУША: Регенерация +10% ХП каждый ход
     if (battle.mode === 'soul_trial' && battle.soul === 'red') {
         const regen = Math.floor(h.maxHp * 0.1);
@@ -3482,8 +3727,13 @@ function enemyTurn() {
         }
     });
 
-    // 1. Собираем живых врагов (проверяем stun > 0, а не stunned)
-    let attackers = battle.enemies.filter(e => e.hp > 0 && (e.stun || 0) <= 0);
+    // 1. Собираем живых врагов (проверяем stun, silence, frozen)
+    let attackers = battle.enemies.filter(e => 
+        e.hp > 0 && 
+        (e.stun || 0) <= 0 && 
+        (e.silence || 0) <= 0 && 
+        (e.frozen || 0) <= 0
+    );
 
     // 🔥 RIFT MODE: На фазах 2-6 приспешники атакуют первыми
     if (battle.mode === 'rift') {
@@ -3543,6 +3793,42 @@ function processEnemyAttack() {
 
     // Берем следующего врага
     let enemy = battle.attackQueue.shift();
+
+    // === ПРОВЕРКА ЭФФЕКТОВ НА ВРАГЕ ===
+    // Silence - враг не может атаковать
+    if (enemy.silence && enemy.silence > 0) {
+        showFloatText("🔇 SILENCED", 200, 100, '#8b5cf6');
+        enemy.silence--;
+        setTimeout(processEnemyAttack, 400);
+        return;
+    }
+    // Frozen - враг заморожен
+    if (enemy.frozen && enemy.frozen > 0) {
+        showFloatText("❄️ FROZEN", 200, 100, '#00ffff');
+        enemy.frozen--;
+        setTimeout(processEnemyAttack, 400);
+        return;
+    }
+    // Charm - враг бьет своих
+    if (enemy.charm && enemy.charm > 0) {
+        showFloatText("🦩 CHARMED!", 200, 100, '#e879f9');
+        // Враг бьет случайного союзника-врага
+        const enemyTargets = battle.enemies.filter(e => e.hp > 0 && e !== enemy);
+        if (enemyTargets.length > 0) {
+            const randomTarget = enemyTargets[Math.floor(Math.random() * enemyTargets.length)];
+            const charmDmg = Math.floor(enemy.atk * 0.8);
+            randomTarget.hp = Math.max(0, randomTarget.hp - charmDmg);
+            const targetIdx = battle.enemies.indexOf(randomTarget);
+            const targetEl = document.getElementById(`enemy-${targetIdx}`);
+            if (targetEl) {
+                showFloatText(`-${charmDmg} 🦩`, targetEl.getBoundingClientRect().left + 20, targetEl.getBoundingClientRect().top, '#e879f9');
+            }
+            enemy.charm--;
+            setTimeout(processEnemyAttack, 400);
+            return;
+        }
+        enemy.charm--;
+    }
 
     // 🔥 FIX: Урон наносится только на действующего персонажа (который походил в этом ходе)
     let target = battle.team[battle.turnId];
@@ -3671,6 +3957,15 @@ function resolveEnemyAttack(qteResult) {
         if (target.stats.thorns) {
             enemy.hp -= Math.floor(dmg * 0.5);
             showFloatText("COUNTER!", 200, 150, '#fff');
+        }
+
+        // Электрический контр-урон от Кашимо
+        if (target.counter_electric && target.counter_electric > 0) {
+            const electricCounterDmg = Math.floor(enemy.atk * (target.counter_electric / 100));
+            enemy.hp = Math.max(0, enemy.hp - electricCounterDmg);
+            enemy.electric_mark = (enemy.electric_mark || 0) + 1; // Помечаем электричеством
+            showFloatText(`⚡ COUNTER -${electricCounterDmg}`, 200, 150, '#ffff00');
+            target.counter_electric--;
         }
 
         // 🔥 FIX: REFLECTION ON PERFECT BLOCK (50% ATK)
@@ -5120,6 +5415,7 @@ window.startRaidBattle = async () => {
         // Запуск
         battle.mode = 'raid';
         battle.active = true;
+    battle.turnCount = 0; // Инициализация счетчика ходов
         startBattle(1);
 
     } catch (e) {
@@ -5135,6 +5431,7 @@ window.startRaidBattle = async () => {
 
             battle.mode = 'raid';
             battle.active = true;
+    battle.turnCount = 0; // Инициализация счетчика ходов
             startBattle(1);
             return;
         }
