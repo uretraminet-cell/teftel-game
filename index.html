@@ -78,6 +78,25 @@
                 <div class="world-sq-btn ws-ut" onclick="window.setWorld('ut')"><div style="font-size:1.5rem">❤️</div><div>UT</div></div>
             </div>
             
+            <!-- 🔥 СИСТЕМА СОХРАНЕНИЯ ОТРЯДОВ (3 слота) -->
+            <div style="display:flex; flex-direction:column; gap:8px; margin-top:15px; padding:12px; background:rgba(0,0,0,0.4); border-radius:8px; border: 1px solid rgba(255,215,0,0.3);">
+                <div style="font-size:0.65rem; color:#aaa; text-align:center; margin-bottom:5px;">💾 СОХРАНЕНИЕ ОТРЯДОВ</div>
+                <div style="display:grid; grid-template-columns: repeat(3, 1fr); gap:8px;">
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <button class="icon-btn" style="height:45px; font-size:1.2rem; background:linear-gradient(135deg, #1e3a8a, #3b82f6);" onclick="window.saveSquadToSlot(0)" title="Сохранить в слот 1">💾<br><span style="font-size:0.5rem;">СЛОТ 1</span></button>
+                        <button class="btn-main" style="height:35px; font-size:0.7rem; background:#374151;" onclick="window.loadSquadFromSlot(0)" title="Загрузить слот 1">📂 ЗАГР</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <button class="icon-btn" style="height:45px; font-size:1.2rem; background:linear-gradient(135deg, #7c2d12, #ea580c);" onclick="window.saveSquadToSlot(1)" title="Сохранить в слот 2">💾<br><span style="font-size:0.5rem;">СЛОТ 2</span></button>
+                        <button class="btn-main" style="height:35px; font-size:0.7rem; background:#374151;" onclick="window.loadSquadFromSlot(1)" title="Загрузить слот 2">📂 ЗАГР</button>
+                    </div>
+                    <div style="display:flex; flex-direction:column; gap:5px;">
+                        <button class="icon-btn" style="height:45px; font-size:1.2rem; background:linear-gradient(135deg, #581c87, #a855f7);" onclick="window.saveSquadToSlot(2)" title="Сохранить в слот 3">💾<br><span style="font-size:0.5rem;">СЛОТ 3</span></button>
+                        <button class="btn-main" style="height:35px; font-size:0.7rem; background:#374151;" onclick="window.loadSquadFromSlot(2)" title="Загрузить слот 3">📂 ЗАГР</button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="main-battle-block">
                 <div class="tower-icon-anim" id="tower-icon" onclick="window.trackClick('tower')">🗼</div>
                 <div style="font-size:0.8rem; margin-bottom:10px; color:var(--color-gold);" id="tower-name">Башня Проклятий</div>
@@ -94,19 +113,6 @@
 
         <h4 style="margin: 20px 0 10px; color:var(--text-muted); font-size:0.7rem; text-align: center;">YOUR SQUAD</h4>
         <div id="home-squad-list" style="display:flex; gap:10px; justify-content:center; padding-bottom:10px;"></div>
-        
-        <!-- 🔥 FIX: Система сохранения отрядов (3 слота) -->
-        <div style="display:flex; flex-direction:column; gap:10px; margin-top:10px; padding:10px; background:rgba(0,0,0,0.3); border-radius:8px;">
-            <button class="btn-main" style="width:100%; font-size:0.8rem;" onclick="window.saveSquadToSlot(0); window.saveSquadToSlot(1); window.saveSquadToSlot(2);" title="Сохранить текущий отряд во все слоты">💾 СОХРАНИТЬ ОТРЯД</button>
-            <div style="display:flex; gap:5px; justify-content:center;">
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(0)" title="Сохранить в слот 1">💾</button>
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(0)" title="Загрузить слот 1">1️⃣</button>
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(1)" title="Сохранить в слот 2">💾</button>
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(1)" title="Загрузить слот 2">2️⃣</button>
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.saveSquadToSlot(2)" title="Сохранить в слот 3">💾</button>
-                <button class="icon-btn" style="width:50px; height:50px; font-size:1.5rem;" onclick="window.loadSquadFromSlot(2)" title="Загрузить слот 3">3️⃣</button>
-            </div>
-        </div>
     </div> 
     
     <div id="tab-heroes" class="tab-content" style="display:none">
