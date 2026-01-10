@@ -179,15 +179,17 @@
                             <div style="font-size:1.5rem">❤️</div>
                             <div>UT</div>
                         </div>
+                        <div class="world-sq-btn ws-dr" onclick="window.setWorld('dr')">
+                            <div style="font-size:1.5rem">🌀</div>
+                            <div>DR</div>
+                        </div>
                     </div>
 
                     <div class="main-battle-block">
                         <div class="tower-icon-anim" id="tower-icon" onclick="window.trackClick('tower')">🗼</div>
                         <div style="font-size:0.8rem; margin-bottom:10px; color:var(--color-gold);" id="tower-name">
                             Башня Проклятий</div>
-                        <button class="btn-main btn-start-battle" onclick="window.preBattle()">В БОЙ ⚔️<br><span
-                                style="font-size:0.6rem; color:#aaa;">ЭТАЖ <span
-                                    id="menu-floor">1</span></span></button>
+                        <button class="btn-main btn-start-battle" onclick="window.preBattle()">В БОЙ ⚔️</button>
                     </div>
 
                     <!-- 🔥 FIX: Реорганизация - Доп режимы объединены в одну вкладку -->
@@ -216,6 +218,7 @@
                     <button class="filter-tab" onclick="window.handleFilterClick('op', this)">OP</button>
                     <button class="filter-tab" onclick="window.handleFilterClick('jojo', this)">JOJO</button>
                     <button class="filter-tab" onclick="window.handleFilterClick('ut', this)">UT</button>
+                    <button class="filter-tab" onclick="window.handleFilterClick('dr', this)">DR</button>
                 </div>
 
                 <div class="hero-filter-row" style="border-bottom: 4px solid #000; margin-bottom: 15px;">
@@ -340,13 +343,14 @@
         <div id="screen-battle" class="screen">
             <div
                 style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px; padding: 0 5px;">
-                <div style="font-size:0.6rem; color:var(--text-muted);"><span id="battle-world-name">ЭТАЖ</span> <span
-                        id="battle-lvl" style="color:#fff">1</span></div>
                 <div style="display: flex; gap: 5px; align-items: center;">
-                    <button class="icon-btn" style="padding: 4px; font-size: 0.8rem;"
-                        onclick="window.showPerksList()">🎁</button>
                     <div id="turn-indicator"
                         style="font-size:0.6rem; background:#333; padding:2px 5px; border:1px solid #000;">ВАШ ХОД</div>
+                </div>
+                <div
+                    style="font-size:0.6rem; color:var(--text-muted); position: absolute; left: 50%; transform: translateX(-50%);">
+                    <span id="battle-world-name">ЭТАЖ</span> <span id="battle-lvl" style="color:#fff">1</span></div>
+                <div style="display: flex; gap: 5px; align-items: center;">
                 </div>
             </div>
 

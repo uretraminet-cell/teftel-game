@@ -1690,6 +1690,17 @@ margin-top: 10px;
     text-shadow: 0 0 10px #ff0000;
 }
 
+/* DR: Темно-фиолетовый градиент */
+.ws-dr {
+    border-color: #9333ea;
+    background: linear-gradient(180deg, #18181b 30%, rgba(139, 92, 246, 0.4) 100%);
+    box-shadow: 0 4px 0 #6b21a8;
+}
+
+.ws-dr div:first-child {
+    text-shadow: 0 0 10px #9333ea;
+}
+
 @keyframes glitch-anim {
     0% {
         transform: translate(0);

@@ -89,7 +89,7 @@ let st = {
     curFloor: 1,
     riftFloor: 1,
     arenaRank: 1000, arenaWins: 0,
-    runPerks_jjk: [], runPerks_op: [], runPerks_jojo: [], runPerks_ut: [],
+    runPerks_jjk: [], runPerks_op: [], runPerks_jojo: [], runPerks_ut: [], runPerks_dr: [],
     upgrades: { goldMult: 0, xpMult: 0, atk: 0, hp: 0, crit: 0 },
     world: 'jjk', maxTowerFloor: 1, lastSentFloor: 0, codesUsed: [],
     quests: { kills: 0, summons: 0, damage: 0, clicks: 0, deaths: 0, perfectQTE: 0, soulTrials: 0 },
@@ -308,29 +308,32 @@ function safeDisplay(id, val) { const el = document.getElementById(id); if (el) 
 // В main.js обновите setWorld:
 
 function setWorld(w) {
-    // Добавляем 'ut' в список разрешенных
-    if (!['jjk', 'op', 'jojo', 'ut'].includes(w)) w = 'jjk';
+    // Добавляем 'ut' и 'dr' в список разрешенных
+    if (!['jjk', 'op', 'jojo', 'ut', 'dr'].includes(w)) w = 'jjk';
 
-    // Проверка престижа (Например, UT доступен с 3 престижа)
+    // Проверка престижа (Например, UT доступен с 3 престижа, DR с 4)
     if (w === 'op' && st.prestige < 1) return showNotice("Нужен 1 Престиж!", 'error');
     if (w === 'jojo' && st.prestige < 2) return showNotice("Нужно 2 Престижа!", 'error');
     if (w === 'ut' && st.prestige < 3) return showNotice("Нужно 3 Престижа для Undertale!", 'error');
+    if (w === 'dr' && st.prestige < 4) return showNotice("Нужно 4 Престижа для Deltarune!", 'error');
 
     st.world = w;
     st.curFloor = st.floors[w] || 1;
 
-    const titles = { 'jjk': 'Башня Проклятий', 'op': 'Grand Line', 'jojo': 'Bizarre Adventure', 'ut': 'Подземелье' };
-    const icons = { 'jjk': '🗼', 'op': '🌊', 'jojo': '⭐', 'ut': '❤️' };
+    const titles = { 'jjk': 'Башня Проклятий', 'op': 'Grand Line', 'jojo': 'Bizarre Adventure', 'ut': 'Подземелье', 'dr': 'Темный Мир' };
+    const icons = { 'jjk': '🗼', 'op': '🌊', 'jojo': '⭐', 'ut': '❤️', 'dr': '🌀' };
 
     const elName = document.getElementById('tower-name');
     if (elName) elName.innerText = titles[w] || 'Башня';
     const elIcon = document.getElementById('tower-icon');
     if (elIcon) elIcon.innerText = icons[w] || '🗼';
 
-    // Инициализация перков для UT, если их нет
+    // Инициализация перков для UT и DR, если их нет
     if (!st.runPerks_ut) st.runPerks_ut = [];
-    // Инициализация этажей для UT
+    if (!st.runPerks_dr) st.runPerks_dr = [];
+    // Инициализация этажей для UT и DR
     if (!st.floors.ut) st.floors.ut = 1;
+    if (!st.floors.dr) st.floors.dr = 1;
 
     updateUI();
     updateAtmosphere();
@@ -656,10 +659,15 @@ function updateUI() {
         });
 
         for (let k of keys) {
-            const h = st.heroes[k]; // Данные игрока
             const d = window.DB[k]; // База данных
+            if (!d) continue;
 
-            if (!h || !d) continue;
+            // Пропускаем врагов (они не персонажи игрока)
+            if (['poppup', 'jigsawry', 'rudinn_guard', 'hathy'].includes(k)) continue;
+
+            // Инициализируем персонажа, если его нет
+            if (!st.heroes[k]) st.heroes[k] = { stars: 0, lvl: 1, exp: 0, duplicates: 0, upgrades: 0 };
+            const h = st.heroes[k];
 
             // 2. ФИЛЬТРАЦИЯ (ВКЛАДКИ)
             if (currentHeroFilter !== 'all') {
@@ -668,7 +676,7 @@ function updateUI() {
                     const role = d.role || 'fighter';
                     if (role !== currentHeroFilter) continue;
                 }
-                // Если фильтр это мир (jjk, op, jojo...)
+                // Если фильтр это мир (jjk, op, jojo, ut, dr...)
                 else {
                     if (d.w !== currentHeroFilter) continue;
                 }
@@ -1236,7 +1244,7 @@ function showPerkSelection() {
 
 function selectPerk(pid) {
     if (st.world === 'jjk') st.runPerks_jjk.push(pid); else if (st.world === 'op') st.runPerks_op.push(pid); else st.runPerks_jojo.push(pid);
-    safeDisplay('modal-perks', 'none'); safeDisplay('modal-win', 'flex'); save();
+    safeDisplay('modal-perks', 'none'); /* safeDisplay('modal-win', 'flex'); */ save();
 }
 
 function recycleDuplicates() {
@@ -1478,7 +1486,7 @@ function getStats(id) {
     const h = st.heroes[id];
     const d = window.DB[id];
     // Проверяем форму
-    const baseData = (h.form && window.DB_FORMS && window.DB_FORMS[h.form]) ? window.DB_FORMS[h.form] : d;
+    const baseData = (h.form && window.DB_FORMS && window.DB_FORMS[h.form]) ? window.DB_FORMS[h.form] : (window.DB[h.form] || d);
 
     if (!d || !h) return { hp: 100, atk: 10, stars: 1, lvl: 1, startUlt: 0 };
 
@@ -1595,6 +1603,10 @@ window.openHero = (id) => {
     // Проверка на форму (трансформацию)
     if (h.form && window.DB_FORMS && window.DB_FORMS[h.form]) {
         acts = window.DB_FORMS[h.form].act;
+    } else if (h.form && window.DB[h.form]) {
+        acts = window.DB[h.form].act;
+    } else if (h.form && window.DB[h.form]) {
+        acts = window.DB[h.form].act;
     }
 
     if (acts) {
@@ -2378,6 +2390,7 @@ function renderBattle() {
         ew.innerHTML += `
         <div class="enemy-unit ${extraClass} ${i === battle.targetIdx ? 'selected' : ''}" id="enemy-${i}" onclick="window.selectTarget(${i})">
             <div style="font-size:3rem; transition: transform 0.2s;">${en.vis}</div>
+            <div style="font-size:0.55rem; color:#fff; font-weight:bold; margin-bottom:2px;">${en.name || 'Враг'}</div>
             
             <div class="bar-group" style="width:50px; height:12px; margin:2px auto; position:relative;">
                 <div class="bar-state-img" style="background-image: url('img/ui/hp_${enHpIdx}.png'); background-size: cover;"></div>
@@ -3750,6 +3763,13 @@ function enemyTurn() {
         (e.frozen || 0) <= 0
     );
 
+    // 🔥 LEVIATHAN PRIORITY: Если есть миньоны, босс не атакует
+    const hasMinions = attackers.some(e => e.isLeviathanMinion);
+    if (hasMinions) {
+        attackers = attackers.filter(e => !e.isLeviathan);
+    }
+    );
+
     // 🔥 RIFT MODE: На фазах 2-6 приспешники атакуют первыми
     if (battle.mode === 'rift') {
         const leviathan = attackers.find(e => e.isLeviathan);
@@ -4240,25 +4260,7 @@ function win() {
     }
 
     // --- ОБНОВЛЕНИЕ ОКНА ПОБЕДЫ (ТОЛЬКО ДЛЯ ОСОБЫХ РЕЖИМОВ) ---
-    const winModal = document.getElementById('modal-win');
-    if (winModal) {
-        const box = winModal.querySelector('.modal-box');
-        box.innerHTML = `
-            <h1 style="color:var(--color-gold); font-size:2rem; text-align:center;">VICTORY!</h1>
-            <div style="font-size:5rem; margin:10px 0; text-align:center; width:100%;">🏆</div>
-            <div id="win-rewards" style="margin-bottom:20px; font-weight:bold; font-size:0.8rem; text-align:center;">${rewardText}</div>
-            <button class="btn-main" onclick="window.nextFloor()">NEXT ⏩</button>
-            <button class="btn-main btn-danger" style="margin-top:5px;" onclick="window.goToMenu()">MENU 🏠</button>
-        `;
-    }
-    safeDisplay('modal-win', 'flex');
-
-    // 4. ПРОВЕРКА НА ПЕРКИ
-    if (battle.mode === 'tower' && st.curFloor > 1 && st.curFloor % 5 === 0) {
-        showPerkSelection();
-    } else {
-        safeDisplay('modal-win', 'flex');
-    }
+    // Убрано - больше не показываем окно победы после выбора перков
 }
 
 function lose() {
@@ -4526,6 +4528,7 @@ window.showPerksList = () => {
     else if (st.world === 'op') perks = st.runPerks_op || [];
     else if (st.world === 'jojo') perks = st.runPerks_jojo || [];
     else if (st.world === 'ut') perks = st.runPerks_ut || [];
+    else if (st.world === 'dr') perks = st.runPerks_dr || [];
 
     // 🔥 FIX: Показываем перки во время забега
     // Если мы в бою и есть активные перки, показываем их
@@ -5781,15 +5784,25 @@ function updateAtmosphere() {
         }
         else {
             // ОБЫЧНЫЕ МИРЫ
-            bgImage = `bg/battle_${st.world}.jpg`;
-            targetSrc = `music/battle_${st.world}.mp3`;
+            if (st.world === 'dr') {
+                bgImage = 'bg/delta.png';
+                targetSrc = 'music/delta.mp3';
+            } else {
+                bgImage = `bg/battle_${st.world}.jpg`;
+                targetSrc = `music/battle_${st.world}.mp3`;
+            }
             if (st.world === 'ut' && app) app.classList.add('ut-mode');
         }
     }
     // --- ПРИОРИТЕТ 3: МЕНЮ ---
     else {
-        bgImage = `bg/menu_${st.world}.jpg`;
-        targetSrc = `music/menu_${st.world}.mp3`;
+        if (st.world === 'dr') {
+            bgImage = 'bg/delta.png';
+            targetSrc = 'music/delta.mp3';
+        } else {
+            bgImage = `bg/menu_${st.world}.jpg`;
+            targetSrc = `music/menu_${st.world}.mp3`;
+        }
     }
 
     // Применяем изменения фона
@@ -6081,15 +6094,25 @@ function updateAtmosphere() {
         }
         else {
             // ОБЫЧНЫЕ МИРЫ
-            bgImage = `bg/battle_${st.world}.jpg`;
-            targetSrc = `music/battle_${st.world}.mp3`;
+            if (st.world === 'dr') {
+                bgImage = 'bg/delta.png';
+                targetSrc = 'music/delta.mp3';
+            } else {
+                bgImage = `bg/battle_${st.world}.jpg`;
+                targetSrc = `music/battle_${st.world}.mp3`;
+            }
             if (st.world === 'ut' && app) app.classList.add('ut-mode');
         }
     }
     // --- ПРИОРИТЕТ 3: МЕНЮ ---
     else {
-        bgImage = `bg/menu_${st.world}.jpg`;
-        targetSrc = `music/menu_${st.world}.mp3`;
+        if (st.world === 'dr') {
+            bgImage = 'bg/delta.png';
+            targetSrc = 'music/delta.mp3';
+        } else {
+            bgImage = `bg/menu_${st.world}.jpg`;
+            targetSrc = `music/menu_${st.world}.mp3`;
+        }
     }
 
     // Применяем фон
