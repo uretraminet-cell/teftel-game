@@ -11,7 +11,7 @@ window.RARITY_MULTS = {
 };
 
 // Множители миров (Пункт 6)
-window.WORLD_MULTS = { 'jjk': 1.0, 'op': 1.5, 'jojo': 2.0, 'ut': 2.5, 'void': 3.0 };
+window.WORLD_MULTS = { 'jjk': 1.0, 'op': 1.5, 'jojo': 2.0, 'ut': 2.5, 'dr': 1.8, 'void': 3.0 };
 
 // --- БАЛАНС v7.0 ---
 
@@ -1561,6 +1561,310 @@ window.DB_FORMS = {
             U('GAME OVER', 30.0, 10, 'Закрывает игру (Смертельный урон)', 'pure'),
             U('Save & Load', 20.0, 8, 'Перезагрузка (Урон + Хил)', 'damage_heal')
         ]
+    },
+
+    // ==========================================
+    // 🌀 DELTARUNE (CHAPTER 1 & 2) 🌀
+    // ==========================================
+
+    'kris': {
+        w: 'dr', n: "Kris", r: "Special", role: 'fighter', v: "🗡️",
+        hp: 120, atk: 18, def: 12, spd: 14,
+        act: [
+            G('Sword Attack', 1.2, 'Обычная атака мечом', true),
+            G('Darkener Blade', 1.5, 'Клинок тьмы (Крит)', true, 'crit'),
+            D('Shield Bash', 0, 'Удар щитом (Стан)', true, null, { t: 'stun', d: 1 }),
+            H('Healing Aura', 40, 'Аура исцеления', 'all'),
+            { t: 'buff', n: 'Soul Surge', v: 0, d: 'Заряд души (Бафф Атаки)', target: 'self', eff: { t: 'buff_atk', v: 30, d: 2 }, cd: 3 },
+            { t: 'buff', n: 'Dark Determination', v: 0, d: 'Решимость (Снятие дебаффов)', target: 'self', eff: { t: 'cleanse' }, cd: 4 },
+            U('Rune Slash', 5.0, 7, 'Мощный рунический удар', 'phys'),
+            U('SOUL STRIKE', 8.0, 10, 'Удар душой (Чистый урон)', 'pure')
+        ]
+    },
+
+    'susie': {
+        w: 'dr', n: "Susie", r: "Rare", role: 'fighter', v: "🦖",
+        hp: 140, atk: 22, def: 10, spd: 12,
+        act: [
+            G('Rude Buster', 1.6, 'Грубый взрыв', true),
+            G('Bite Attack', 1.4, 'Укус (Кровотечение)', true, null, { t: 'bleed', v: 40, d: 3 }),
+            { t: 'buff', n: 'Pacify', v: 0, d: 'Умиротворение (Стан врага)', target: 'enemy', eff: { t: 'stun', d: 1 }, cd: 3 },
+            G('Tail Swipe', 1.1, 'Удар хвостом (АОЕ)', true, null, null, true),
+            { t: 'buff', n: 'Roar', v: 0, d: 'Грозный рык (Снижение атаки врагов)', target: 'all_enemies', eff: { t: 'atk_down', d: 2 }, cd: 4 },
+            { t: 'buff', n: 'Hyper Offensive', v: 0, d: 'Берсерк (+50% Атаки)', target: 'self', eff: { t: 'buff_atk', v: 50, d: 2 }, cd: 4 },
+            U('Wild Slash', 6.0, 7, 'Дикий разрез', 'phys'),
+            U('EARTHQUAKE STOMP', 5.0, 8, 'Землетрясение (АОЕ + Стан)', null, { t: 'stun', d: 1 }, null, true)
+        ]
+    },
+
+    'ralsei': {
+        w: 'dr', n: "Ralsei", r: "Special", role: 'support', v: "🧙",
+        hp: 100, atk: 15, def: 8, spd: 15,
+        act: [
+            G('Fire Spell', 1.3, 'Огненное заклинание (Поджог)', true, null, { t: 'burn', v: 30, d: 3 }),
+            H('Healing Hands', 60, 'Лечебные руки', 'friend'),
+            { t: 'buff', n: 'Rune Shield', v: 0, d: 'Рунический щит (Щит всем)', target: 'all', eff: { t: 'shield', v: 40 }, cd: 4 },
+            G('Dark Matter Blast', 1.5, 'Взрыв темной материи', true),
+            { t: 'buff', n: 'Comfort', v: 0, d: 'Утешение (Снятие дебаффов со всех)', target: 'all', eff: { t: 'cleanse' }, cd: 4 },
+            { t: 'buff', n: 'Protective Barrier', v: 0, d: 'Защитный барьер (Неуязвимость на 1 ход)', target: 'self', eff: { t: 'buff_evade', d: 1 }, cd: 5 },
+            U('Magic Boost', 0, 7, 'Магическое усиление (Бафф всей команды)', 'buff_all'),
+            U('HEALING PRAYER', 0, 9, 'Молитва исцеления (Полный хил всех)', 'heal_all')
+        ]
+    },
+
+    'king': {
+        w: 'dr', n: "King", r: "Special", role: 'tank', v: "👑",
+        hp: 160, atk: 18, def: 15, spd: 10,
+        act: [
+            G('Spade Slash', 1.4, 'Разрез пикой', true),
+            { t: 'buff', n: 'Shadow Dash', v: 0, d: 'Теневой рывок (Уворот)', target: 'self', eff: { t: 'buff_evade', d: 1 }, cd: 3 },
+            { t: 'buff', n: 'Royal Decree', v: 0, d: 'Королевский указ (Принудительная атака)', target: 'self', eff: { t: 'taunt', d: 1 }, cd: 4 },
+            G('Dark Bomb', 1.3, 'Темная бомба (АОЕ)', true, null, null, true),
+            { t: 'buff', n: 'Crown Power', v: 0, d: 'Сила короны (Бафф Защиты)', target: 'self', eff: { t: 'buff_def', d: 3 }, cd: 4 },
+            { t: 'buff', n: 'Dominate', v: 0, d: 'Доминирование (Снижение защиты врага)', target: 'enemy', eff: { t: 'def_down', d: 2 }, cd: 3 },
+            U('Kingdom Slash', 6.0, 8, 'Удар королевства', 'heavy'),
+            U('CHAOS KING BATTLE', 4.0, 9, 'Битва Хаоса (АОЕ + Страх)', null, { t: 'atk_down', d: 2 }, null, true)
+        ]
+    },
+
+    'lancer': {
+        w: 'dr', n: "Lancer", r: "Rare", role: 'fighter', v: "🚲",
+        hp: 110, atk: 16, def: 10, spd: 16,
+        act: [
+            G('Lance Strike', 1.3, 'Удар пикой', true),
+            { t: 'buff', n: 'Silly Joke', v: 0, d: 'Глупая шутка (Снижение точности врага)', target: 'enemy', eff: { t: 'acc_down', d: 2 }, cd: 2 },
+            H('Cheer Up', 30, 'Поддержка (Хил)', 'friend'),
+            G('Spiked Ball', 1.2, 'Шипастый мяч (АОЕ)', true, null, null, true),
+            G('Friendly Thrust', 1.5, 'Дружеский выпад', true),
+            { t: 'buff', n: "Prince's Guidance", v: 0, d: 'Наставление принца (Бафф Скорости)', target: 'self', eff: { t: 'buff_speed', d: 3 }, cd: 4 },
+            U('Dazzling Spin', 5.0, 7, 'Ослепительное вращение', 'phys'),
+            U('GRAND CHARGE', 4.0, 8, 'Великий рывок (Много ударов)', 'multihit')
+        ]
+    },
+
+    'jevil': {
+        w: 'dr', n: "Jevil", r: "Legendary", role: 'mage', v: "🃏",
+        hp: 130, atk: 25, def: 10, spd: 18,
+        act: [
+            G('Devilish Punch', 1.4, 'Дьявольский удар', true),
+            G('Scythe Spin', 1.6, 'Вращение косы (АОЕ)', true, null, null, true),
+            G('Chaos Magic', 1.5, 'Магия хаоса (Случайный эффект)', true, 'magic'),
+            G('Dark Fire', 1.4, 'Темный огонь (Поджог)', true, null, { t: 'burn', v: 60, d: 3 }),
+            { t: 'buff', n: 'Chaotic Laughter', v: 0, d: 'Хаотичный смех (Стан всех)', target: 'all_enemies', eff: { t: 'stun', d: 1 }, cd: 5 },
+            { t: 'buff', n: 'Twisted Blessing', v: 0, d: 'Искаженное благословение (Бафф Атаки и Уворота)', target: 'self', eff: { t: 'buff_atk', v: 40, d: 3 }, cd: 4 },
+            U('Void Dance', 7.0, 8, 'Танец пустоты', 'magic'),
+            U('HYPERFLIP CHAOS', 5.0, 9, 'Гипер-хаос (Чистый урон всем)', 'pure', null, null, true)
+        ]
+    },
+
+    'spamton': {
+        w: 'dr', n: "Spamton", r: "Mythic", role: 'assassin', v: "🕶️",
+        hp: 120, atk: 28, def: 8, spd: 20,
+        act: [
+            G('Spam Blast', 1.5, 'Спам-атака', true),
+            { t: 'buff', n: 'Sales Pitch', v: 0, d: 'Рекламная пауза (Снижение защиты врага)', target: 'enemy', eff: { t: 'def_down', d: 3 }, cd: 3 },
+            H('Kromer Exchange', 50, 'Обмен Кромера (Хил)', 'self'),
+            G('BIG SHOT', 2.5, 'БОЛЬШОЙ ВЫСТРЕЛ (Игнор брони)', true, 'pure'),
+            { t: 'buff', n: 'Advertisement', v: 0, d: 'Реклама (Бафф Крита)', target: 'self', eff: { t: 'buff_crit', d: 3 }, cd: 4 },
+            { t: 'buff', n: 'Market Crash', v: 0, d: 'Обвал рынка (Снижение атаки всех врагов)', target: 'all_enemies', eff: { t: 'atk_down', d: 2 }, cd: 4 },
+            U('Viral Content', 6.0, 8, 'Вирусный контент (АОЕ + Яд)', null, { t: 'poison', v: 80, d: 3 }, null, true),
+            U('CYBER WORLD TAKEOVER', 10.0, 10, 'Захват кибермира (Ваншот)', 'execute')
+        ]
+    },
+
+    'noelle': {
+        w: 'dr', n: "Noelle", r: "Special", role: 'mage', v: "🦌",
+        hp: 105, atk: 18, def: 9, spd: 14,
+        act: [
+            G('Ice Shot', 1.4, 'Ледяной выстрел (Замедление)', true, null, { t: 'speed_down', d: 2 }),
+            H('Heal Prayer', 50, 'Молитва исцеления', 'friend'),
+            { t: 'buff', n: 'Protect Spell', v: 0, d: 'Заклинание защиты (Щит)', target: 'friend', eff: { t: 'shield', v: 40 }, cd: 3 },
+            G('Winter Storm', 1.3, 'Зимний шторм (АОЕ)', true, null, null, true),
+            { t: 'buff', n: 'Frozen Blessing', v: 0, d: 'Замороженное благословение (Бафф Магии)', target: 'self', eff: { t: 'buff_atk', v: 30, d: 3 }, cd: 4 },
+            { t: 'buff', n: 'Blizzard Barrier', v: 0, d: 'Барьер метели (Уворот)', target: 'self', eff: { t: 'buff_evade', d: 2 }, cd: 4 },
+            U('Holy Light', 0, 7, 'Святой свет (Снятие дебаффов и хил всех)', 'heal_all'),
+            U('BLIZZARD PRAYER', 6.0, 9, 'Молитва метели (АОЕ Заморозка)', null, { t: 'stun', d: 2 }, null, true)
+        ]
+    },
+
+    'berdly': {
+        w: 'dr', n: "Berdly", r: "Special", role: 'fighter', v: "🐦",
+        hp: 115, atk: 20, def: 11, spd: 15,
+        act: [
+            G('Brave Strike', 1.4, 'Храбрый удар', true),
+            { t: 'buff', n: 'Daring Move', v: 0, d: 'Смелый ход (Уворот)', target: 'self', eff: { t: 'buff_evade', d: 1 }, cd: 3 },
+            { t: 'buff', n: 'Help Guard', v: 0, d: 'Помощь в защите (Щит союзнику)', target: 'friend', eff: { t: 'shield', v: 30 }, cd: 3 },
+            G('Fearless Dance', 1.2, 'Бесстрашный танец (АОЕ)', true, null, null, true),
+            { t: 'buff', n: "Knight's Pride", v: 0, d: 'Гордость рыцаря (Бафф Атаки)', target: 'self', eff: { t: 'buff_atk', v: 40, d: 2 }, cd: 4 },
+            { t: 'buff', n: 'Valor Stance', v: 0, d: 'Стойка доблести (Бафф Защиты)', target: 'self', eff: { t: 'buff_def', d: 3 }, cd: 4 },
+            U('Chivalrous Strike', 6.0, 7, 'Рыцарский удар', 'phys'),
+            U('ULTIMATE VALOR', 5.0, 8, 'Абсолютная доблесть (Бафф всей команды)', 'buff_all')
+        ]
+    },
+
+    'queen': {
+        w: 'dr', n: "Queen", r: "Divine", role: 'mage', v: "👸",
+        hp: 150, atk: 35, def: 15, spd: 16,
+        act: [
+            G('Virus Blast', 1.8, 'Вирусный бластер (Яд)', true, null, { t: 'poison', v: 100, d: 3 }),
+            { t: 'buff', n: 'Delete', v: 0, d: 'Удалить (Снятие баффов врага)', target: 'enemy', eff: { t: 'dispel' }, cd: 4 },
+            { t: 'buff', n: 'Firewall', v: 0, d: 'Фаервол (Мощный щит на всех)', target: 'all', eff: { t: 'shield', v: 60 }, cd: 5 },
+            H('System Reboot', 80, 'Перезагрузка системы (Хил себя)', 'self'),
+            { t: 'buff', n: 'Network Surge', v: 0, d: 'Сетевой всплеск (Бафф Скорости всем)', target: 'all', eff: { t: 'buff_speed', d: 3 }, cd: 4 },
+            { t: 'buff', n: 'Takeover', v: 0, d: 'Захват (Стан врага)', target: 'enemy', eff: { t: 'stun', d: 2 }, cd: 4 },
+            U('Malware Injection', 8.0, 9, 'Инъекция вредоносного ПО (АОЕ Чистый урон)', 'pure', null, null, true),
+            U('COMPLETE NETWORK CONTROL', 0, 10, 'Полный контроль сети (Враги пропускают 2 хода)', 'stun_all')
+        ]
+    },
+
+    'rouxls_kaard': {
+        w: 'dr', n: "Rouxls Kaard", r: "Rare", role: 'mage', v: "🃏",
+        hp: 100, atk: 14, def: 8, spd: 12,
+        act: [
+            G('Card Slash', 1.3, 'Карточный разрез', true),
+            G('Spell Card', 1.5, 'Магическая карта', true, 'magic'),
+            { t: 'buff', n: 'Gambling Luck', v: 0, d: 'Удача игрока (Случайный бафф)', target: 'self', eff: { t: 'buff_atk', v: 20, d: 2 }, cd: 3 },
+            { t: 'buff', n: 'Card Shield', v: 0, d: 'Карточный щит', target: 'self', eff: { t: 'shield', v: 30 }, cd: 3 },
+            { t: 'buff', n: 'Shuffle Deck', v: 0, d: 'Перетасовка (Сброс КД одного скилла)', target: 'self', eff: { t: 'reset_cooldowns' }, cd: 5 },
+            { t: 'buff', n: 'Fortune Telling', v: 0, d: 'Предсказание (Бафф Точности)', target: 'all', eff: { t: 'buff_acc', d: 3 }, cd: 4 },
+            U('Royal Flush', 5.0, 7, 'Роял-флеш (АОЕ)', null, null, null, true),
+            U('ACE OF SPADES', 7.0, 8, 'Пиковый туз (Критический урон)', 'crit')
+        ]
+    },
+
+    'mad_mew_mew': {
+        w: 'dr', n: "Mad Mew Mew", r: "Special", role: 'fighter', v: "🐱",
+        hp: 110, atk: 22, def: 10, spd: 18,
+        act: [
+            G('Meow Attack', 1.3, 'Мяу-атака', true),
+            G('Paw Slash', 1.5, 'Удар лапой (Кровотечение)', true, null, { t: 'bleed', v: 50, d: 3 }),
+            { t: 'buff', n: 'Cat Reflexes', v: 0, d: 'Кошачьи рефлексы (Уворот)', target: 'self', eff: { t: 'buff_evade', d: 2 }, cd: 3 },
+            H('Furry Hug', 40, 'Пушистые объятия (Хил)', 'friend'),
+            G('Tail Whip', 1.2, 'Удар хвостом (Снижение скорости врага)', true, null, { t: 'speed_down', d: 2 }),
+            { t: 'buff', n: 'Territorial Roar', v: 0, d: 'Территориальный рык (Бафф Атаки)', target: 'self', eff: { t: 'buff_atk', v: 30, d: 3 }, cd: 4 },
+            U('Feline Fury', 6.0, 7, 'Кошачья ярость (Много ударов)', 'multihit'),
+            U('ULTIMATE MEOW STRIKE', 8.0, 9, 'Ультимативный мяу-удар', 'phys')
+        ]
+    },
+
+    'poppup': {
+        w: 'dr', n: "Poppup", r: "Common", role: 'fighter', v: "🎈",
+        hp: 80, atk: 10, def: 5, spd: 10,
+        act: [
+            G('Pop Attack', 1.1, 'Поп-атака', true),
+            { t: 'buff', n: 'Scare', v: 0, d: 'Испуг (Снижение атаки врага)', target: 'enemy', eff: { t: 'atk_down', d: 2 }, cd: 2 },
+            { t: 'buff', n: 'Protect', v: 0, d: 'Защита (Щит)', target: 'self', eff: { t: 'shield', v: 20 }, cd: 3 },
+            G('Pop Bounce', 1.2, 'Поп-прыжок', true),
+            { t: 'buff', n: 'Inflate', v: 0, d: 'Надувание (Бафф ХП)', target: 'self', eff: { t: 'buff_hp', v: 20, d: 3 }, cd: 4 },
+            G('Burst Wave', 1.3, 'Взрывная волна (АОЕ)', true, null, null, true),
+            U('Squeak Blast', 4.0, 6, 'Писклявый бластер', 'magic'),
+            U('POP EXPLOSION', 5.0, 7, 'Поп-взрыв (Урон всем)', null, null, null, true)
+        ]
+    },
+
+    'jigsawry': {
+        w: 'dr', n: "Jigsawry", r: "Rare", role: 'fighter', v: "🧩",
+        hp: 100, atk: 15, def: 12, spd: 11,
+        act: [
+            G('Puzzle Attack', 1.3, 'Атака-головоломка', true),
+            { t: 'buff', n: 'Rearrange', v: 0, d: 'Перестановка (Снятие дебаффов)', target: 'self', eff: { t: 'cleanse' }, cd: 3 },
+            { t: 'buff', n: 'Defense Matrix', v: 0, d: 'Матрица защиты (Щит на команду)', target: 'all', eff: { t: 'shield', v: 25 }, cd: 4 },
+            { t: 'buff', n: 'Pattern Recognition', v: 0, d: 'Распознавание образов (Бафф Точности)', target: 'self', eff: { t: 'buff_acc', d: 3 }, cd: 3 },
+            { t: 'buff', n: 'Logic Barrier', v: 0, d: 'Логический барьер (Снижение урона)', target: 'self', eff: { t: 'buff_def', d: 2 }, cd: 4 },
+            G('Piece Together', 1.4, 'Сборка воедино (Хил)', 'self'),
+            U('Shuffle', 4.0, 7, 'Перемешивание (АОЕ Замедление)', null, { t: 'speed_down', d: 2 }, null, true),
+            U('PATTERN OVERLOAD', 6.0, 8, 'Перегрузка паттерна (Стан)', null, { t: 'stun', d: 1 })
+        ]
+    },
+
+    'rudinn_guard': {
+        w: 'dr', n: "Rudinn Guard", r: "Rare", role: 'tank', v: "🛡️",
+        hp: 130, atk: 12, def: 15, spd: 9,
+        act: [
+            G('Guard Slash', 1.2, 'Разрез стражника', true),
+            { t: 'buff', n: 'Fortify', v: 0, d: 'Укрепление (Бафф Защиты)', target: 'self', eff: { t: 'buff_def', d: 3 }, cd: 3 },
+            { t: 'buff', n: 'Standing Tall', v: 0, d: 'Во весь рост (Таунт)', target: 'self', eff: { t: 'taunt', d: 2 }, cd: 4 },
+            { t: 'buff', n: 'Phalanx Formation', v: 0, d: 'Построение фаланги (Щит всем)', target: 'all', eff: { t: 'shield', v: 30 }, cd: 5 },
+            { t: 'buff', n: 'Duty Calls', v: 0, d: 'Зов долга (Снятие дебаффов с союзника)', target: 'friend', eff: { t: 'cleanse' }, cd: 3 },
+            { t: 'buff', n: 'Defensive Stance', v: 0, d: 'Оборонительная стойка (Уворот)', target: 'self', eff: { t: 'buff_evade', d: 1 }, cd: 4 },
+            U('Guard Counter', 4.0, 7, 'Контрудар стражи', 'counter'),
+            U('IRON WALL DEFENSE', 0, 9, 'Железная стена (Полная неуязвимость команды 1 ход)', 'immortal_all')
+        ]
+    },
+
+    'hathy': {
+        w: 'dr', n: "Hathy", r: "Special", role: 'fighter', v: "♥️",
+        hp: 110, atk: 18, def: 10, spd: 13,
+        act: [
+            G('Horn Charge', 1.4, 'Удар рогами', true),
+            G('Wild Stomp', 1.3, 'Дикий топ (АОЕ)', true, null, null, true),
+            { t: 'buff', n: 'Antler Shield', v: 0, d: 'Щит из рогов', target: 'self', eff: { t: 'shield', v: 35 }, cd: 3 },
+            G('Trample', 1.5, 'Растаптывание', true),
+            { t: 'buff', n: 'Beastly Roar', v: 0, d: 'Звериный рык (Снижение атаки врага)', target: 'enemy', eff: { t: 'atk_down', d: 2 }, cd: 3 },
+            G('Furious Headbutt', 1.6, 'Яростный удар головой (Стан)', true, null, { t: 'stun', d: 1 }),
+            U('Gore', 6.0, 7, 'Пронзание', 'phys'),
+            U('CHARGING HORN STORM', 5.0, 8, 'Шторм таранящих рогов (АОЕ)', null, null, null, true)
+        ]
+    },
+
+    'king_of_spades': {
+        w: 'dr', n: "King of Spades", r: "Legendary", role: 'fighter', v: "♠️",
+        hp: 150, atk: 24, def: 14, spd: 12,
+        act: [
+            G('Royal Flush', 1.5, 'Королевский разрез', true),
+            G('Card Trick', 1.4, 'Карточный трюк (Случайный урон)', true, 'magic'),
+            { t: 'buff', n: 'Suit Barrier', v: 0, d: 'Барьер масти (Щит)', target: 'self', eff: { t: 'shield', v: 50 }, cd: 4 },
+            G('Spade Blast', 1.6, 'Взрыв пик (АОЕ)', true, null, null, true),
+            { t: 'buff', n: 'Card Shuffle', v: 0, d: 'Перетасовка карт (Бафф Атаки)', target: 'self', eff: { t: 'buff_atk', v: 40, d: 3 }, cd: 4 },
+            { t: 'buff', n: 'Royal Decree', v: 0, d: 'Королевский указ (Стан всех)', target: 'all_enemies', eff: { t: 'stun', d: 1 }, cd: 5 },
+            U('Diamond Cut', 7.0, 8, 'Алмазный разрез', 'phys'),
+            U('ROYAL FLUSH ROYALE', 6.0, 9, 'Роял-флеш рояль (Чистый урон всем)', 'pure', null, null, true)
+        ]
+    },
+
+    'seam': {
+        w: 'dr', n: "Seam", r: "Divine", role: 'support', v: "🧵",
+        hp: 140, atk: 20, def: 12, spd: 14,
+        act: [
+            G('Strange Deal', 1.5, 'Странная сделка (Снятие баффов врага)', true, 'dispel'),
+            { t: 'buff', n: 'Shadow Price', v: 0, d: 'Теневая цена (Снижение атаки врага)', target: 'enemy', eff: { t: 'atk_down', d: 3 }, cd: 3 },
+            { t: 'buff', n: 'Void Swap', v: 0, d: 'Обмен пустоты (Передача дебаффов врагу)', target: 'enemy', eff: { t: 'cleanse' }, cd: 4 },
+            { t: 'buff', n: 'Chaos Offer', v: 0, d: 'Предложение хаоса (Случайный бафф союзнику)', target: 'friend', eff: { t: 'buff_atk', v: 50, d: 2 }, cd: 3 },
+            { t: 'buff', n: 'Black Market', v: 0, d: 'Черный рынок (Бафф Крита всей команде)', target: 'all', eff: { t: 'buff_crit', d: 3 }, cd: 5 },
+            G('Void Touch', 1.4, 'Прикосновение пустоты (Яд)', true, null, { t: 'poison', v: 80, d: 3 }),
+            U('Ancient Bargain', 0, 8, 'Древняя сделка (Огромный хил и щит всей команде)', 'heal_all'),
+            U('FORBIDDEN KNOWLEDGE', 10.0, 10, 'Запретное знание (Чистый урон + Стан всех)', 'pure', { t: 'stun', d: 2 }, null, true)
+        ]
+    },
+
+    'the_knight': {
+        w: 'dr', n: "The Knight", r: "Divine", role: 'assassin', v: "🗡️",
+        hp: 160, atk: 32, def: 14, spd: 18,
+        act: [
+            G('Dark Slash', 1.8, 'Темный разрез (Игнор брони)', true, 'pure'),
+            { t: 'buff', n: 'Void Realm', v: 0, d: 'Царство пустоты (Уворот 100%)', target: 'self', eff: { t: 'buff_evade', d: 2 }, cd: 4 },
+            { t: 'buff', n: 'Abyss Barrier', v: 0, d: 'Баррьер бездны (Отражение урона)', target: 'self', eff: { t: 'reflect', v: 50, d: 2 }, cd: 4 },
+            { t: 'buff', n: 'Whisper of Void', v: 0, d: 'Шепот пустоты (Стан врага)', target: 'enemy', eff: { t: 'stun', d: 1 }, cd: 3 },
+            { t: 'buff', n: 'Abyssal Presence', v: 0, d: 'Присутствие бездны (Снижение всех статов врагов)', target: 'all_enemies', eff: { t: 'atk_down', d: 3 }, cd: 5 },
+            { t: 'buff', n: 'Void Step', v: 0, d: 'Шаг в пустоту (Сброс КД)', target: 'self', eff: { t: 'reset_cooldowns' }, cd: 6 },
+            U('Dark Consumption', 9.0, 9, 'Темное поглощение (Ваншот)', 'execute'),
+            U('FORGOTTEN NIGHTMARE', 7.0, 10, 'Забытый кошмар (АОЕ Чистый урон)', 'pure', null, null, true)
+        ]
+    },
+
+    'the_angel': {
+        w: 'dr', n: "The Angel", r: "Divine", role: 'support', v: "😇",
+        hp: 180, atk: 25, def: 16, spd: 15,
+        act: [
+            G('Holy Strike', 1.6, 'Святой удар', true),
+            H('Blessing', 100, 'Благословение (Полный хил союзника)', 'friend'),
+            { t: 'buff', n: 'Celestial Barrier', v: 0, d: 'Небесный барьер (Неуязвимость на 2 хода союзнику)', target: 'friend', eff: { t: 'buff_evade', d: 2 }, cd: 5 },
+            G('Divine Judgment', 2.0, 'Божественный суд (Чистый урон)', true, 'pure'),
+            { t: 'buff', n: 'Salvation Aura', v: 0, d: 'Аура спасения (Щит всем + Реген)', target: 'all', eff: { t: 'shield', v: 50 }, cd: 5 },
+            { t: 'buff', n: 'Heavenly Smile', v: 0, d: 'Небесная улыбка (Снятие всех дебаффов)', target: 'all', eff: { t: 'cleanse' }, cd: 4 },
+            U('Sacred Flame', 8.0, 8, 'Священное пламя (АОЕ Ожог)', 'fire', { t: 'burn', v: 100, d: 5 }, null, true),
+            U('SALVATION', 0, 10, 'Спасение (Воскрешение всех павших союзников)', 'revive_all')
+        ]
     }
 };
 
@@ -1644,7 +1948,19 @@ window.SYNERGIES = [
     { ids: ['superman', 'luffy'], n: '🦸‍♂️ Герои', desc: 'Отряд: +50% ХП', apply: (s) => { s.hp = Math.floor(s.hp * 1.5); } },
     { ids: ['dio', 'sukuna'], n: '😈 Чистое Зло', desc: 'Отряд: +40% Атаки', apply: (s) => { s.atk = Math.floor(s.atk * 1.4); } },
     { ids: ['zoro', 'toji'], n: '⚔️ Без Магии', desc: 'Отряд: +50% Крит Урона', apply: (s) => { s.critDmg = 50; } },
-    { ids: ['gojo', 'sans'], n: '🚫 Неприкасаемые', desc: 'Отряд: +30% Уворот', apply: (s) => { s.evade += 30; } }
+    { ids: ['gojo', 'sans'], n: '🚫 Неприкасаемые', desc: 'Отряд: +30% Уворот', apply: (s) => { s.evade += 30; } },
+
+    // ===========================
+    // 🌀 DELTARUNE (Свет и Тьма)
+    // ===========================
+    { ids: ['kris', 'susie', 'ralsei'], n: '✨ Трио Света', desc: 'Отряд: +20% ВСЕ СТАТЫ', apply: (s) => { s.atk = Math.floor(s.atk * 1.2); s.hp = Math.floor(s.hp * 1.2); } },
+    { ids: ['king', 'lancer', 'jevil'], n: '🌑 Темные Боссы', desc: 'Отряд: +30% Атаки', apply: (s) => { s.atk = Math.floor(s.atk * 1.3); } },
+    { ids: ['ralsei', 'noelle', 'queen'], n: '🔮 Магический Отряд', desc: 'Отряд: +25% Магии (Атаки)', apply: (s) => { s.atk = Math.floor(s.atk * 1.25); } },
+    { ids: ['the_knight', 'spamton', 'jevil'], n: '⚔️ Темные Воины', desc: 'Отряд: +40% Атаки', apply: (s) => { s.atk = Math.floor(s.atk * 1.4); } },
+    { ids: ['rudinn_guard', 'hathy', 'king_of_spades'], n: '🛡️ Охранники', desc: 'Отряд: +20% Защиты', apply: (s) => { s.defBonus = (s.defBonus || 0) + 20; } },
+    { ids: ['noelle', 'queen', 'berdly'], n: '❄️ Светлые Маги', desc: 'Отряд: +30% Маны (Реген)', apply: (s) => { s.manaRegen = true; } },
+    { ids: ['jevil', 'king_of_spades', 'seam', 'the_knight', 'the_angel'], n: '🌟 Легендарные', desc: 'Отряд: +50% Урона', apply: (s) => { s.atk = Math.floor(s.atk * 1.5); } },
+    { ids: ['rouxls_kaard', 'king_of_spades', 'jigsawry'], n: '🃏 Картовые Маги', desc: 'Отряд: +25% Крит Шанса', apply: (s) => { s.crit = (s.crit || 0) + 25; } }
 ];
 
 // === ЦВЕТА ДУШИ (Режим Испытания) ===
