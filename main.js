@@ -535,7 +535,8 @@ function init() {
         }, 500);
     }
     window.switchTab('home', document.getElementById('nav-home'));
-    updateUI();
+    save();
+    renderSavedSquads();
 }
 
 // --- ВСТАВИТЬ В MAIN.JS (ЗАМЕНИТЬ СТАРУЮ updateUI) ---
@@ -574,19 +575,22 @@ function updateUI() {
     // Мир 2: добавляется Левиафан и Колизей
     // Мир 3: добавляется Гильдия
     // Мир 4: добавляется Испытание Души
-    
-    const worldNum = st.world === 'jjk' ? 1 : (st.world === 'op' ? 2 : (st.world === 'jojo' ? 3 : 4));
+
+    const currentWorldNum = st.world === 'jjk' ? 1 : (st.world === 'op' ? 2 : (st.world === 'jojo' ? 3 : 4));
+    // 🔥 ФИКС: Учитываем престиж для постоянной разблокировки
+    const unlockedLevel = Math.max(st.prestige + 1, currentWorldNum);
+
     const prevWorldNum = st.prevWorldNum || 1;
-    
+
     // 🔥 FIX: Отслеживание показанных уведомлений
     if (!st.shownUnlocks) st.shownUnlocks = {};
-    
-    // Вкладка "Доп режимы" (разблокируется со 2-го мира)
+
+    // Вкладка "Доп режимы" (разблокируется со 2-го мира или 1 престижа)
     const navModes = document.getElementById('nav-modes');
     const tabModes = document.getElementById('tab-modes');
     if (navModes && tabModes) {
-        if (worldNum >= 2) {
-            if (prevWorldNum < 2 && !st.shownUnlocks.modes) {
+        if (unlockedLevel >= 2) {
+            if (currentWorldNum >= 2 && prevWorldNum < 2 && !st.shownUnlocks.modes) {
                 showNotice("🎮 Разблокированы Доп Режимы!\n🌊 Разлом Левиафана\n⚔️ Колизей", 'level');
                 st.shownUnlocks.modes = true;
                 save();
@@ -604,36 +608,36 @@ function updateUI() {
             navModes.style.display = 'none';
         }
     }
-    
-    // Вкладка "Гильдия" (разблокируется с 3-го мира)
+
+    // Вкладка "Гильдия" (разблокируется с 3-го мира или 2 престижа)
     const navClan = document.getElementById('nav-clan');
     if (navClan) {
-        if (worldNum >= 3 && prevWorldNum < 3 && !st.shownUnlocks.clan) {
+        if (unlockedLevel >= 3 && currentWorldNum >= 3 && prevWorldNum < 3 && !st.shownUnlocks.clan) {
             showNotice("🏰 Разблокирована Гильдия!\n☠️ Рейд Босс доступен", 'level');
             st.shownUnlocks.clan = true;
             save();
         }
-        navClan.style.display = worldNum >= 3 ? 'flex' : 'none';
+        navClan.style.display = unlockedLevel >= 3 ? 'flex' : 'none';
     }
-    
-    // Испытание Души (разблокируется с 4-го мира)
+
+    // Испытание Души (разблокируется с 4-го мира или 3 престижа)
     const soulContainer = document.getElementById('mode-soul-container');
     if (soulContainer) {
-        if (worldNum >= 4 && prevWorldNum < 4 && !st.shownUnlocks.soul) {
+        if (unlockedLevel >= 4 && currentWorldNum >= 4 && prevWorldNum < 4 && !st.shownUnlocks.soul) {
             showNotice("❤️ Разблокировано Испытание Души!", 'level');
             st.shownUnlocks.soul = true;
             save();
         }
-        soulContainer.style.display = worldNum >= 4 ? 'flex' : 'none';
+        soulContainer.style.display = unlockedLevel >= 4 ? 'flex' : 'none';
     }
-    
-    // Рейд Босс (разблокируется с 3-го мира - гильдия)
+
+    // Рейд Босс (разблокируется с 3-го уровня прогресса)
     const raidContainer = document.getElementById('mode-raid-container');
     if (raidContainer) {
-        raidContainer.style.display = worldNum >= 3 ? 'flex' : 'none';
+        raidContainer.style.display = unlockedLevel >= 3 ? 'flex' : 'none';
     }
-    
-    st.prevWorldNum = worldNum;
+
+    st.prevWorldNum = currentWorldNum;
 
     // Отрисовка списка героев (Вкладка Герои)
     const hl = document.getElementById('heroes-list');
@@ -1212,16 +1216,16 @@ function showPerkSelection() {
         // Цвета редкости: 1=Белый, 2=Синий, 3=Золотой
         let nameColor = '#fff';
         let borderColor = 'transparent';
-        if (p.r === 2) { nameColor = '#3b82f6'; borderColor = 'rgba(59, 130, 246, 0.3)'; }
-        if (p.r === 3) { nameColor = '#fbbf24'; borderColor = 'rgba(251, 191, 36, 0.3)'; }
+        if (p.r === 2) { nameColor = '#3b82f6'; borderColor = 'rgba(59, 130, 246, 0.4)'; }
+        if (p.r === 3) { nameColor = '#fbbf24'; borderColor = 'rgba(251, 191, 36, 0.4)'; }
 
-        el.style.border = `1px solid ${borderColor}`;
+        el.style.border = `2px solid ${borderColor}`;
 
         el.innerHTML = `
-            <div style="font-size:2rem">${p.i}</div>
-            <div style="flex:1; margin-left:10px; text-align:left;">
-                <div style="font-weight:bold; color:${nameColor}">${p.n}</div>
-                <div style="font-size:0.7rem; color:#aaa">${p.d}</div>
+            <div class="perk-icon">${p.i}</div>
+            <div class="perk-info">
+                <div class="perk-name" style="color:${nameColor}">${p.n}</div>
+                <div class="perk-desc">${p.d}</div>
             </div>
         `;
         cont.appendChild(el);
@@ -2129,7 +2133,7 @@ window.startBattle = (floorNum, enemyData = null) => {
         // ЛЕВИАФАН - Единственный и абсолютный босс Разлома
         // Каждое сражение - это дуэль с ним (и его призываемыми щупальцами)
         battle.enemies.push({
-            hp: baseHp * 40, max: baseHp * 40, atk: Math.floor(baseAtk * 4.0),
+            hp: baseHp * 40, max: baseHp * 40, atk: Math.floor(baseAtk * 2.2), // 🔥 FIX: Reduced from 4.0 to 2.2 to prevent one-shots
             boss: true, vis: '🐋', name: 'ЛЕВИАФАН', isLeviathan: true,
             phase: 1, role: 'boss', effects: [], blocking: false
         });
@@ -2230,7 +2234,7 @@ window.startBattle = (floorNum, enemyData = null) => {
         infoBtn.style.color = '#fff';
         infoBtn.style.borderColor = '#1e3a8a';
     }
-    
+
     infoBtn.onclick = () => {
         let msg = "";
         if (battle.mode === 'rift') {
@@ -2668,7 +2672,7 @@ function doAction(qteResult) {
     // Обрабатываем эффекты на героях
     Object.values(battle.team).forEach(hero => {
         if (hero.curHp <= 0) return;
-        
+
         // Кровотечение
         if (hero.bleed > 0) {
             const bleedDmg = Math.floor(hero.maxHp * 0.05); // 5% от макс ХП
@@ -2676,7 +2680,7 @@ function doAction(qteResult) {
             if (bleedDmg > 0) showFloatText(`-${bleedDmg} 🩸`, 150, 250, 'red');
             hero.bleed--;
         }
-        
+
         // Ожог
         if (hero.burn > 0) {
             const burnDmg = Math.floor(hero.maxHp * 0.03); // 3% от макс ХП
@@ -2684,7 +2688,7 @@ function doAction(qteResult) {
             if (burnDmg > 0) showFloatText(`-${burnDmg} 🔥`, 150, 250, 'orange');
             hero.burn--;
         }
-        
+
         // Яд
         if (hero.poison > 0 && hero.poisonVal > 0) {
             hero.curHp = Math.max(0, hero.curHp - hero.poisonVal);
@@ -2717,11 +2721,11 @@ function doAction(qteResult) {
         if (hero.charm > 0) hero.charm--;
         if (hero.futureSight > 0) hero.futureSight--;
     });
-    
+
     // Обрабатываем эффекты на врагах
     battle.enemies.forEach(enemy => {
         if (enemy.hp <= 0) return;
-        
+
         // Кровотечение
         if (enemy.bleed > 0) {
             const bleedDmg = Math.floor(enemy.max * 0.05);
@@ -2729,7 +2733,7 @@ function doAction(qteResult) {
             if (bleedDmg > 0) showFloatText(`-${bleedDmg} 🩸`, 200, 100, 'red');
             enemy.bleed--;
         }
-        
+
         // Ожог
         if (enemy.burn > 0) {
             const burnDmg = Math.floor(enemy.max * 0.03);
@@ -2737,7 +2741,7 @@ function doAction(qteResult) {
             if (burnDmg > 0) showFloatText(`-${burnDmg} 🔥`, 200, 100, 'orange');
             enemy.burn--;
         }
-        
+
         // Яд
         if (enemy.poison > 0 && enemy.poisonVal > 0) {
             enemy.hp = Math.max(0, enemy.hp - enemy.poisonVal);
@@ -2825,18 +2829,15 @@ function doAction(qteResult) {
     // 🔥 FIX: ADD TRANSFORMATION LOGIC
     if (pendingAct.mech === 'transform') {
         const formId = pendingAct.eff ? pendingAct.eff.form : null;
-        if (formId && window.DB_FORMS && window.DB_FORMS[formId]) {
-            const form = window.DB_FORMS[formId];
+        let form = (window.DB_FORMS && window.DB_FORMS[formId]) ? window.DB_FORMS[formId] : (window.DB && window.DB[formId]);
 
+        if (form) {
             // 1. Изменяем визуал
-            h.vis = form.v; // Нужно обновить в объекте героя
-            // Если нужно поменять имя: h.name = form.n; 
+            h.vis = form.v;
+            h.name = form.n;
 
-            // 2. Бонусы статов (в %)
+            // 2. Бонусы статов (если есть в конфиге формы)
             if (form.hp_bonus) {
-                const bonus = Math.floor((h.baseHp || h.maxHp) * (form.hp_bonus / 100)); // baseHp safe fallback
-                // Если baseHp нет, используем maxHp (но аккуратно, чтобы не стакалось бесконечно)
-                // Проще: h.maxHp = Math.floor(h.maxHp * (1 + form.hp_bonus / 100));
                 h.maxHp = Math.floor(h.maxHp * (1 + form.hp_bonus / 100));
                 h.curHp = Math.floor(h.curHp * (1 + form.hp_bonus / 100));
             }
@@ -2844,14 +2845,11 @@ function doAction(qteResult) {
                 h.stats.atk = Math.floor(h.stats.atk * (1 + form.atk_bonus / 100));
             }
 
-            // 3. Замена скиллов (важно!)
-            // В `renderSkills` мы уже добавили проверку: if (h.form) acts = ...
-            // Так что просто ставим флаг формы
+            // 3. Замена скиллов
             h.form = formId;
 
             showFloatText(`TRANSFORM! ${form.v}`, 200, 200, '#a855f7');
 
-            // Анимация
             const hv = document.getElementById('hero-vis');
             if (hv) {
                 hv.innerText = form.v;
@@ -2859,10 +2857,8 @@ function doAction(qteResult) {
                 setTimeout(() => hv.classList.remove('crit-flash'), 500);
             }
 
-            // Сброс хода (или можно дать доп ход)
-            // Возвращаем врагу ход
             renderBattle();
-            renderSkills(); // Обновить кнопки
+            renderSkills();
             battle.turn = 'enemy';
             setTimeout(enemyTurn, 250);
             return;
@@ -3069,19 +3065,24 @@ function doAction(qteResult) {
     }
 
     // 6. ПРИМЕНЕНИЕ К ЦЕЛЯМ
+    // 6. ПРИМЕНЕНИЕ К ЦЕЛЯМ
     targets.forEach(trg => {
         // --- СТАТУСЫ ---
+        const enemyIdx = battle.enemies.indexOf(trg);
+        const enemyEl = document.getElementById(`enemy-${enemyIdx}`);
+
+        // 🔥 FIX: Вычисляем effectY ЗДЕСЬ, чтобы переменная была доступна везде внутри цикла
+        let effectY = 200;
+        if (enemyEl) {
+            const rect = enemyEl.getBoundingClientRect();
+            effectY = rect.top - 20; // Выше эмодзи
+        }
+
         if (pendingAct.eff && typeof pendingAct.eff === 'object') {
             const e = pendingAct.eff;
-            // 🔥 FIX: Эффекты показываем выше эмодзи врага
-            const enemyIdx = battle.enemies.indexOf(trg);
-            const enemyEl = document.getElementById(`enemy-${enemyIdx}`);
-            let effectY = 200;
-            if (enemyEl) {
-                const rect = enemyEl.getBoundingClientRect();
-                effectY = rect.top - 20; // Выше эмодзи
-            }
-            
+
+            // (Убрано локальное объявление effectY отсюда)
+
             if (e.t === 'stun') { trg.stun = (trg.stun || 0) + e.d; showFloatText("💤 STUN", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#ffff00', 'effect'); }
             if (e.t === 'blind') { trg.blind = (trg.blind || 0) + e.d; showFloatText("👁️ BLIND", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, '#888', 'effect'); }
             if (e.t === 'burn') { trg.burn = (trg.burn || 0) + e.d; showFloatText("🔥 BURN", enemyEl ? enemyEl.getBoundingClientRect().left + 20 : 200, effectY, 'orange', 'effect'); }
@@ -3169,7 +3170,7 @@ function doAction(qteResult) {
                 baseDmg = Math.floor(baseDmg * 1.3);
                 showFloatText("🛡️ ARMOR DOWN!", 200, 100, '#9ca3af');
             }
-            
+
             // 🔥 FIX: Визуализация баффов урона от синергий команды
             if (h.stats.atk && h.stats.atk > getStats(h.id).atk) {
                 const bonus = h.stats.atk - getStats(h.id).atk;
@@ -3490,10 +3491,11 @@ function doAction(qteResult) {
                         // 🔥 FIX: Между фазами 2-6 спавнятся обычные враги (не только приспешники)
                         if (trg.phase >= 2 && trg.phase <= 6) {
                             // Спавним обычных врагов между фазами
-                            const regularEnemyCount = trg.phase - 1; // 1 враг на фазе 2, 2 на фазе 3, и т.д.
+                            // Уменьшено: 1 враг на фазе 2-3, 2 врага на фазе 4-6
+                            const regularEnemyCount = trg.phase <= 3 ? 1 : 2;
                             const baseHp = Math.floor(trg.max * 0.1); // 10% от ХП босса
                             const baseAtk = Math.floor(trg.atk * 0.3); // 30% от атаки босса
-                            
+
                             for (let i = 0; i < regularEnemyCount; i++) {
                                 let roleData = window.getRandomRole ? window.getRandomRole('rift') : { vis: '🐟', name: 'Рыба-глюк', hpMult: 1, atkMult: 1, role: 'norm' };
                                 battle.enemies.push({
@@ -3599,6 +3601,19 @@ function doAction(qteResult) {
 
         // --- ЛЕЧЕНИЕ ---
         else if (pendingAct.t === 'heal' || pendingAct.mech === 'heal_all' || pendingAct.mech === 'panacea') {
+            targets.forEach(trg => {
+                if (trg.curHp <= 0 && pendingAct.mech !== 'revive') return;
+
+                // 🔥 FIX: Начисляем хил от МАКС ХП цели
+                let amt = Math.floor(trg.maxHp * (pendingAct.v / 100));
+                if (isNaN(amt)) amt = Math.floor(trg.maxHp * 0.2); // Фолбек 20%
+
+                // Бонус хила от статов/перков
+                if (h.stats.healMult) amt = Math.floor(amt * (1 + h.stats.healMult / 100));
+
+                trg.curHp = Math.min(trg.maxHp, trg.curHp + amt);
+                showFloatText(`+${amt}`, undefined, undefined, '#4ade80', 'heal');
+            });
             if (battle.anomaly === 'invert') {
                 let dmg = Math.floor(h.stats.atk * 1.5);
                 if (pendingAct.t === 'ult') dmg *= 3;
@@ -3728,10 +3743,10 @@ function enemyTurn() {
     });
 
     // 1. Собираем живых врагов (проверяем stun, silence, frozen)
-    let attackers = battle.enemies.filter(e => 
-        e.hp > 0 && 
-        (e.stun || 0) <= 0 && 
-        (e.silence || 0) <= 0 && 
+    let attackers = battle.enemies.filter(e =>
+        e.hp > 0 &&
+        (e.stun || 0) <= 0 &&
+        (e.silence || 0) <= 0 &&
         (e.frozen || 0) <= 0
     );
 
@@ -3802,6 +3817,11 @@ function processEnemyAttack() {
         setTimeout(processEnemyAttack, 400);
         return;
     }
+    // 🔥 FIX: Если враг умер (от рефлекта в этом же ходу)
+    if (enemy.hp <= 0) {
+        setTimeout(processEnemyAttack, 100);
+        return;
+    }
     // Frozen - враг заморожен
     if (enemy.frozen && enemy.frozen > 0) {
         showFloatText("❄️ FROZEN", 200, 100, '#00ffff');
@@ -3809,6 +3829,16 @@ function processEnemyAttack() {
         setTimeout(processEnemyAttack, 400);
         return;
     }
+    // 4. КОНЕЦ ХОДА ВРАГА (Сбрасываем статус)
+    enemy.silence = Math.max(0, (enemy.silence || 0) - 1);
+    enemy.stun = Math.max(0, (enemy.stun || 0) - 1);
+    enemy.frozen = Math.max(0, (enemy.frozen || 0) - 1);
+    enemy.bleed = Math.max(0, (enemy.bleed || 0) - 1);
+    enemy.burn = Math.max(0, (enemy.burn || 0) - 1);
+    enemy.poison = Math.max(0, (enemy.poison || 0) - 1);
+
+    // Удаляем мертвых врагов (на всякий случай)
+    battle.enemies = battle.enemies.filter(e => e.hp > 0);
     // Charm - враг бьет своих
     if (enemy.charm && enemy.charm > 0) {
         showFloatText("🦩 CHARMED!", 200, 100, '#e879f9');
@@ -3911,18 +3941,8 @@ function resolveEnemyAttack(qteResult) {
                 showFloatText("💤 STUN!", 150, 250, 'yellow');
                 break;
             case 4:
-                // Фаза 4: AOE атака (весь отряд)
-                dmg = Math.floor(dmg * 1.5);
+                // Фаза 4: AOE атака (весь отряд) - ПОМЕТКА ДЛЯ resolveEnemyAttack
                 showFloatText("🌊 TIDAL WAVE!", 200, 150, '#00ffff');
-                st.squad.forEach(id => {
-                    const h = battle.team[id];
-                    if (h && h.curHp > 0) {
-                        const aoeDmg = Math.floor(dmg * 0.6);
-                        h.curHp -= aoeDmg;
-                        showFloatText(`-${aoeDmg}`, 150, 300, 'red');
-                    }
-                });
-                dmg = Math.floor(dmg * 0.4); // Основной цели меньше урона
                 break;
             case 5:
                 // Фаза 5: Дебафф защиты
@@ -3931,9 +3951,13 @@ function resolveEnemyAttack(qteResult) {
                 showFloatText("🛡️ ARMOR BREAK!", 150, 250, 'gray');
                 break;
             case 6:
-                // Фаза 6: Берсерк (атакует 2-3 раза)
-                dmg = Math.floor(dmg * 2);
-                showFloatText("😈 BERSERK!", 200, 150, '#ff0000');
+                // Фаза 6: Тяжелая атака (вместо Ваншота)
+                if (target.curHp / target.maxHp < 0.3) {
+                    dmg = Math.floor(target.curHp * 0.8 + target.maxHp * 0.1);
+                } else {
+                    dmg = Math.floor(dmg * 2.0);
+                }
+                showFloatText("👁️ ABYSSAL STARE", 200, 150, '#a855f7');
                 const extraHits = Math.floor(Math.random() * 2) + 1; // 1-2 доп атаки
                 for (let i = 0; i < extraHits; i++) {
                     setTimeout(() => {
@@ -4152,9 +4176,25 @@ function win() {
         let pMult = 1 + countPerks('gold') * 0.3;
         let gain = Math.floor(50 * st.curFloor * gMult * pMult);
 
+        // 🔥 FIX: XP Gain for all heroes in squad (including Gaster)
+        let xpGain = Math.floor(10 * st.curFloor);
+        st.squad.forEach(id => {
+            const h = st.heroes[id];
+            if (h) {
+                h.exp = (h.exp || 0) + xpGain;
+                // Левел-ап проверка
+                const nextExp = h.lvl * 100;
+                if (h.exp >= nextExp) {
+                    h.exp -= nextExp;
+                    h.lvl++;
+                    showNotice(`${window.DB[id].n} LVL UP!`, 'level');
+                }
+            }
+        });
+
         // Award Gold directly
         st.gold = (st.gold || 0) + gain;
-        rewardText = `+${gain} G, +${xpGain} XP`;
+        rewardText = `+${gain} G, +${xpGain} XP (ALL)`;
 
         if (st.curFloor % 10 === 0) {
             // Эволюция Итадори только если он в отряде
@@ -4588,7 +4628,7 @@ window.switchTab = (t, btn) => {
 window.saveSquadToSlot = (slot) => {
     if (slot < 0 || slot > 2) return;
     if (!st.savedSquads) st.savedSquads = [{}, {}, {}];
-    
+
     // Сохраняем текущий отряд
     st.savedSquads[slot] = {
         squad: [...st.squad],
@@ -4596,6 +4636,7 @@ window.saveSquadToSlot = (slot) => {
         timestamp: Date.now()
     };
     save();
+    renderSavedSquads(); // 🔥 Refresh UI
     showNotice(`Отряд сохранен в слот ${slot + 1}!`, 'success');
 };
 
@@ -4605,16 +4646,16 @@ window.loadSquadFromSlot = (slot) => {
         showNotice(`Слот ${slot + 1} пуст!`, 'error');
         return;
     }
-    
+
     const saved = st.savedSquads[slot];
-    
+
     // Проверка прогресса
     let hasProgress = (st.floors[st.world] > 1) || (st.riftFloor > 1) ||
-        (st.world === 'jjk' && st.runPerks_jjk.length > 0) ||
-        (st.world === 'op' && st.runPerks_op.length > 0) ||
-        (st.world === 'jojo' && st.runPerks_jojo.length > 0) ||
-        (st.world === 'ut' && st.runPerks_ut.length > 0);
-    
+        (st.world === 'jjk' && st.runPerks_jjk && st.runPerks_jjk.length > 0) ||
+        (st.world === 'op' && st.runPerks_op && st.runPerks_op.length > 0) ||
+        (st.world === 'jojo' && st.runPerks_jojo && st.runPerks_jojo.length > 0) ||
+        (st.world === 'ut' && st.runPerks_ut && st.runPerks_ut.length > 0);
+
     if (hasProgress) {
         showConfirm("Смена отряда сбросит этажи и перки. Продолжить?", (yes) => {
             if (yes) {
@@ -4628,6 +4669,7 @@ window.loadSquadFromSlot = (slot) => {
                 if (st.world === 'ut') st.runPerks_ut = [];
                 save();
                 updateUI();
+                renderSavedSquads(); // 🔥 Refresh UI
                 showNotice(`Отряд загружен из слота ${slot + 1}!`, 'success');
             }
         });
@@ -4635,9 +4677,49 @@ window.loadSquadFromSlot = (slot) => {
         st.squad = [...saved.squad];
         save();
         updateUI();
+        renderSavedSquads(); // 🔥 Refresh UI
         showNotice(`Отряд загружен из слота ${slot + 1}!`, 'success');
     }
 };
+
+function renderSavedSquads() {
+    const cid = 'saved-squads-container-home';
+    if (!st.savedSquads) st.savedSquads = [{}, {}, {}];
+
+    const el = document.getElementById(cid);
+    if (!el) return;
+
+    let html = '';
+    for (let i = 0; i < 3; i++) {
+        const data = st.savedSquads[i];
+        const isExist = data && data.squad && data.squad.length > 0;
+
+        let iconsHtml = '';
+        if (isExist) {
+            data.squad.forEach(id => {
+                const d = window.DB[id];
+                if (d) iconsHtml += `<div class="slot-p-icon">${d.v}</div>`;
+            });
+        } else {
+            iconsHtml = '<div class="slot-empty-text">ПУСТОЙ СЛОТ</div>';
+        }
+
+        html += `
+            <div class="saved-slot-card glass">
+                <div class="slot-info">
+                    <div class="slot-title">СЛОТ ${i + 1}</div>
+                    <div class="slot-preview">${iconsHtml}</div>
+                </div>
+                <div class="slot-actions">
+                    <button class="icon-btn slot-btn" onclick="window.saveSquadToSlot(${i})" title="Сохранить текущий">💾</button>
+                    <button class="icon-btn slot-btn" style="background:#4ade80; color:#000;" onclick="window.loadSquadFromSlot(${i})" title="Загрузить">▶️</button>
+                </div>
+            </div>
+        `;
+    }
+    el.innerHTML = html;
+}
+window.renderSavedSquads = renderSavedSquads;
 
 window.openSettings = openSettings;
 window.saveSettings = saveSettings;
@@ -5415,7 +5497,7 @@ window.startRaidBattle = async () => {
         // Запуск
         battle.mode = 'raid';
         battle.active = true;
-    battle.turnCount = 0; // Инициализация счетчика ходов
+        battle.turnCount = 0; // Инициализация счетчика ходов
         startBattle(1);
 
     } catch (e) {
@@ -5431,7 +5513,7 @@ window.startRaidBattle = async () => {
 
             battle.mode = 'raid';
             battle.active = true;
-    battle.turnCount = 0; // Инициализация счетчика ходов
+            battle.turnCount = 0; // Инициализация счетчика ходов
             startBattle(1);
             return;
         }
